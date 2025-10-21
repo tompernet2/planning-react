@@ -38,7 +38,7 @@ function Login() {
       <h2>Login</h2>
       <br />
       {message && <span>{message}</span>}
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className='flex flex-col'>
         <input onChange={(e) => setEmail(e.target.value)} value={email} type="email" placeholder='Email' required/>
         <input onChange={(e) => setPassword(e.target.value)} value={password} type="password" placeholder='Password' required />
         <button type='submit'>Log in</button>

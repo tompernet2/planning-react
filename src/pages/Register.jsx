@@ -35,10 +35,10 @@ function Register() {
       <h2>Register</h2>
       <br />
       {message && <span>{message}</span>}
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className='flex flex-col'>
         <input onChange={(e) => setEmail(e.target.value)} value={email} type="email" placeholder='Email' required/>
         <input onChange={(e) => setPassword(e.target.value)} value={password} type="password" placeholder='Password' required />
-        <button type='submit'>Create account</button>
+        <button type='submit' className='bg-blue-400'>Create account</button>
       </form>
       <span>Already have an account</span>
       <Link to="/login">Log in.</Link>
