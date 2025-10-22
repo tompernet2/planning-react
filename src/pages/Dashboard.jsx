@@ -1,15 +1,34 @@
 // src/pages/Dashboard.tsx
 import React, { useEffect, useState } from 'react'
 import supabase from '../helper/supabaseClient'
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 function Dashboard() {
   const [user, setUser] = useState(null)
+  const [role, setRole] = useState("")
+  const navigate = useNavigate()
 
-  // ✅ Déclare la fonction AVANT le useEffect
   const checkUser = async () => {
+
     const { data: { session } } = await supabase.auth.getSession()
-    setUser(session?.user || null)
+    if (!session || !session.user) {
+      navigate('/login')
+    } else {
+      setUser(session.user)
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', session.user.id)
+        .single()
+
+
+      if (error) {
+        console.error("Erreur récupération role :", error)
+      } else {
+        setRole(data.role)
+      }
+    }
   }
 
   useEffect(() => {
@@ -22,34 +41,23 @@ function Dashboard() {
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
-    setUser(null) // ✅ Vide localement après déconnexion
+    setUser(null)
+    navigate('/login') 
   }
 
-  // ✅ Si l'utilisateur n'est pas connecté
-  if (!user) {
-    return (
-      <div className="p-6 text-center">
-        <h1 className="text-2xl font-bold mb-4">Mon Compte</h1>
-        <p className="mb-4">Vous n'êtes pas connecté.</p>
-        <div className="flex justify-center gap-4">
-          <Link to="/login" className="bg-blue-600 px-4 py-2 rounded hover:bg-blue-700">Se connecter</Link>
-          <Link to="/register" className="bg-green-600 px-4 py-2 rounded hover:bg-green-700">S'inscrire</Link>
-        </div>
-      </div>
-    )
-  }
+  if (!user) return null 
 
-  // ✅ Si l'utilisateur est connecté
   return (
-    <div className="p-6">
+    <div className="p-6 m-6 bg-white rounded shadow">
       <h1 className="text-2xl font-bold mb-4">Mon Compte</h1>
-      <div className="bg-white p-6 rounded shadow text-gray-800">
+      <div className=" text-gray-800">
         <p className="mb-2"><strong>Email :</strong> {user.email}</p>
-        <p className="text-sm text-gray-500">ID : {user.id}</p>
+        <p className="mb-2"><strong>ID :</strong> {user.id}</p>
+        <p className="mb-4"><strong>Rôle :</strong> {role}</p>
 
-        <button 
-          onClick={handleSignOut} 
-          className="mt-4 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+        <button
+          onClick={handleSignOut}
+          className="mt-4 bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-700"
         >
           Déconnexion
         </button>
