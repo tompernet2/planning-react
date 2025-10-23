@@ -1,10 +1,11 @@
 import React from 'react'
+import Calendar from '../components/Calendar'
 
 function Home() {
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-4">Planning de la semaine</h1>
-      <p className="text-gray-600">Le calendrier s'affichera ici.</p>
+    <div className='p-6 m-6 bg-white rounded shadow'>
+      <h1 className="text-2xl font-bold mb-4">Planning</h1>
+      <Calendar></Calendar>
     </div>
   )
 }
