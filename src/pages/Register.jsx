@@ -1,43 +1,45 @@
-import React, { useState } from 'react'
-import supabase from '../helper/supabaseClient'
-import { Link } from 'react-router-dom'
+import React, { useState } from "react";
+import supabase from "../helper/supabaseClient";
+import { Link } from "react-router-dom";
 
 function Register() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [message, setMessage] = useState("")
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
 
   const handleSubmit = async (event) => {
-    event.preventDefault()
-    setMessage("")
+    event.preventDefault();
+    setMessage("");
 
     const { data, error } = await supabase.auth.signUp({
       email: email,
       password: password,
-    })
+    });
 
     if (error) {
-      setMessage(error.message)
-      return
+      setMessage(error.message);
+      return;
     }
 
     if (data) {
-      setMessage("Compte créé avec succès. Vérifiez vos emails pour confirmer votre inscription.")
+      setMessage(
+        "Compte créé avec succès. Vérifiez vos emails pour confirmer votre inscription."
+      );
     }
 
-    setEmail("")
-    setPassword("")
-  }
+    setEmail("");
+    setPassword("");
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
       <div className="bg-white shadow-lg rounded-2xl p-8 w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Créer un compte</h2>
+        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
+          Créer un compte
+        </h2>
 
         {message && (
-          <div className="mb-4 text-center text-sm p-2 rounded 
-            ${message.includes('succès') ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}"
-          >
+          <div className="mb-4 text-center text-sm p-2 rounded ${message.includes('succès') ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}">
             {message}
           </div>
         )}
@@ -80,7 +82,7 @@ function Register() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default Register
+export default Register;

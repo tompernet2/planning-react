@@ -1,39 +1,41 @@
-import React, { useState } from 'react'
-import supabase from '../helper/supabaseClient'
-import { Link, useNavigate } from 'react-router-dom'
+import React, { useState } from "react";
+import supabase from "../helper/supabaseClient";
+import { Link, useNavigate } from "react-router-dom";
 
 function Login() {
-  const navigate = useNavigate()
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [message, setMessage] = useState("")
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
 
   const handleSubmit = async (event) => {
-    event.preventDefault()
-    setMessage("")
+    event.preventDefault();
+    setMessage("");
 
     const { data, error } = await supabase.auth.signInWithPassword({
       email: email,
       password: password,
-    })
+    });
 
     if (error) {
-      setMessage(error.message)
-      setEmail("")
-      setPassword("")
-      return
+      setMessage(error.message);
+      setEmail("");
+      setPassword("");
+      return;
     }
 
     if (data) {
-      navigate("/dashboard")
-      return null
+      navigate("/");
+      return null;
     }
-  }
+  };
 
   return (
     <div className="w-full h-full flex items-center justify-center bg-gray-100 px-4">
       <div className="bg-white shadow-lg rounded-2xl p-8 w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Connexion</h2>
+        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
+          Connexion
+        </h2>
 
         {message && (
           <div className="mb-4 text-red-600 text-center text-sm bg-red-50 p-2 rounded">
@@ -79,7 +81,7 @@ function Login() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default Login
+export default Login;

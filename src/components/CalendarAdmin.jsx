@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { CgArrowLeftR, CgArrowRightR } from "react-icons/cg";
 import supabase from "../helper/supabaseClient";
 
-function Calendar() {
+function CalendarAdmin() {
   const [creneaux, setCreneaux] = useState([]);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -118,6 +118,7 @@ function Calendar() {
 
   return (
     <div>
+      <h1> Admin connecté </h1>
       {/* Navigation semaine */}
       <div className="flex items-center justify-between mb-6">
         <button
@@ -224,4 +225,4 @@ function Calendar() {
   );
 }
 
-export default Calendar;
+export default CalendarAdmin;
