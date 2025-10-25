@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { CgArrowLeftR, CgArrowRightR } from "react-icons/cg";
 import supabase from "../helper/supabaseClient";
-import { useNavigate } from "react-router-dom";
+//import { useNavigate } from "react-router-dom";
 
 function CalendarClient() {
   const [creneaux, setCreneaux] = useState([]);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showConfirm, setShowConfirm] = useState(false);
-  const navigate = useNavigate();
+  const [selectedSlot, setSelectedSlot] = useState(null);
+  const [alreadyRegistered, setAlreadyRegistered] = useState(false);
+
+  //const navigate = useNavigate();
 
   const heures = [
     "09:00",
@@ -81,11 +84,97 @@ function CalendarClient() {
   const joursSemaine = getJoursSemaine();
 
   const findCreneau = (date, heure) => {
-    const dateFormatee = date.toISOString().split("T")[0];
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const dateFormatee = `${year}-${month}-${day}`;   
     return creneaux.find((c) => {
       const heureDB = c.heure.substring(0, 5);
       return c.date === dateFormatee && heureDB === heure;
     });
+  };
+
+  const findCreneauId = async (date, heure) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const dateFormatee = `${year}-${month}-${day}`;   
+    const heureFormatee = heure + ":00";
+
+    const { data, error } = await supabase
+      .from("creneaux")
+      .select("id")
+      .eq("date", dateFormatee)
+      .eq("heure", heureFormatee)
+      .single();
+
+    if (error) {
+      console.error("Erreur id non trouvé :", error);
+    } else {
+      return data.id
+    }
+  };
+
+  // Vérifier si l'utilisateur est déjà inscrit à ce créneau
+  const checkIfAlreadyRegistered = async (creneauId) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    const { data, error } = await supabase
+      .from("demandes")
+      .select("*")
+      .eq("creneau_id", creneauId)
+      .eq("client_id", session.user.id);
+
+    if (error) {
+      console.error("Erreur vérification inscription :", error);
+      return false;
+    }
+    
+    return data && data.length > 0;
+  };
+
+  const createDemande = async (creneauId) => {
+    const { data: { session } } = await supabase.auth.getSession();
+
+    console.log("creneauId =", creneauId);
+    console.log("session.user.id =", session.user.id);
+    const { error } = await supabase
+      .from("demandes")
+      .insert([
+        {
+          creneau_id: creneauId,
+          client_id: session.user.id,
+          statut: "en_attente",
+        },
+      ]);
+
+    if (error) {
+      console.error("Erreur création demande :", error);
+    } else {
+      setShowConfirm(false);
+      console.log("Demande créé")
+    }
+  };
+
+  const handleSlotClick = async (date, heure) => {
+    const creneauId = await findCreneauId(date, heure);
+    if (creneauId) {
+      const isRegistered = await checkIfAlreadyRegistered(creneauId);
+      setAlreadyRegistered(isRegistered);
+      setSelectedSlot({ date, heure });
+      setShowConfirm(true);
+    } else {
+      console.error("Créneau non trouvé !");
+    }
+  };
+
+  const handleConfirm = async () => {
+    const creneauId = await findCreneauId(selectedSlot.date, selectedSlot.heure);
+    if (creneauId) {
+      await createDemande(creneauId);
+    } else {
+      console.error("Créneau non trouvé !");
+    }
   };
 
   return (
@@ -150,7 +239,9 @@ function CalendarClient() {
                     <td
                       key={i}
                       onClick={() => {
-                        if (isAvailable) setShowConfirm(true);
+                        if (isAvailable) {
+                          handleSlotClick(date, heure);
+                        }
                       }}
                       className={`border p-4 text-center ${bgColor} ${
                         isAvailable ? "cursor-pointer" : ""
@@ -170,23 +261,47 @@ function CalendarClient() {
       {showConfirm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
           <div className="bg-white p-6 rounded shadow-lg">
-            <h2 className="text-lg font-bold mb-4">
-              Pour vous inscrire veuillez vous connecté
-            </h2>
-            <div className="flex justify-end gap-4">
-              <button
-                onClick={() => setShowConfirm(false)}
-                className="px-4 py-2 bg-gray-300 rounded"
-              >
-                Non
-              </button>
-              <button
-                onClick={() => navigate("/login")}
-                className="px-4 py-2 bg-blue-600 text-white rounded"
-              >
-                Oui
-              </button>
-            </div>
+            {alreadyRegistered ? (
+              // Modal si déjà inscrit
+              <>
+                <h2 className="text-lg font-bold mb-4">
+                  Vous êtes déjà inscrit
+                </h2>
+                <div className="flex justify-end">
+                  <button
+                    onClick={() => setShowConfirm(false)}
+                    className="px-4 py-2 bg-gray-300 rounded"
+                  >
+                    Fermer
+                  </button>
+                </div>
+              </>
+            ) : (
+              // Modal pour nouvelle inscription
+              <>
+                <h2 className="text-lg font-bold mb-4">
+                  Voulez vous vous inscrire ?
+                </h2>
+                <div className="flex justify-end gap-4">
+                  <button
+                    onClick={() => setShowConfirm(false)}
+                    className="px-4 py-2 bg-gray-300 rounded"
+                  >
+                    Non
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (selectedSlot) {
+                        handleConfirm()
+                      }
+                    }}
+                    className="px-4 py-2 bg-blue-600 text-white rounded"
+                  >
+                    Oui
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
