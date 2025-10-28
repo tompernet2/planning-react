@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from "react";
 import supabase from "../helper/supabaseClient";
 
-import CalendarAdmin from "../components/Calendar/CalendarAdmin";
-import CalendarClient from "../components/Calendar/CalendarClient";
-import CalendarInvite from "../components/Calendar/CalendarInvite";
+import DemandesAdmin from "../components/Demandes/DemandesAdmin";
+import DemandesClient from "../components/Demandes/DemandesClient";
 
-function Home() {
-  const [user, setUser] = useState(null);
+function Demandes() {
   const [role, setRole] = useState("");
 
   const checkUser = async () => {
@@ -15,8 +13,6 @@ function Home() {
     } = await supabase.auth.getSession();
 
     if (session?.user) {
-      setUser(session.user);
-
       const { data, error } = await supabase
         .from("profiles")
         .select("role")
@@ -43,12 +39,10 @@ function Home() {
 
   return (
     <div className="p-6 m-6 bg-white rounded shadow">
-      {role === "admin" && <CalendarAdmin />}
-      {role === "client" && <CalendarClient />}
-      {/* Si aucun utilisateur n'est connecté ou rôle inconnu, on affiche l'invité */}
-      {!user && <CalendarInvite />}
+      {role === "admin" && <DemandesAdmin />}
+      {role === "client" && <DemandesClient />}
     </div>
   );
 }
 
-export default Home;
+export default Demandes;

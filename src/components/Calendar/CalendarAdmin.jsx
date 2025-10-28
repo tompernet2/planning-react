@@ -1,13 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { CgArrowLeftR, CgArrowRightR } from "react-icons/cg";
-import supabase from "../helper/supabaseClient";
-import { useNavigate } from "react-router-dom";
+import supabase from "../../helper/supabaseClient";
 
-function CalendarInvite() {
+function CalendarAdmin() {
   const [creneaux, setCreneaux] = useState([]);
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedSlot, setSelectedSlot] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
-  const navigate = useNavigate();
+  const [currentDate, setCurrentDate] = useState(new Date());
 
   const heures = [
     "09:00",
@@ -22,6 +21,7 @@ function CalendarInvite() {
     "18:00",
   ];
 
+  // Calcul des dates de la semaine
   const getDebutSemaine = (date) => {
     const d = new Date(date);
     const jour = d.getDay();
@@ -53,6 +53,37 @@ function CalendarInvite() {
     const newDate = new Date(currentDate);
     newDate.setDate(currentDate.getDate() + 7);
     setCurrentDate(newDate);
+  };
+
+  // Gestion des clics et création
+  const handleClickCase = (date, heure) => {
+    const creneau = findCreneau(date, heure);
+    if (creneau) return;
+
+    setSelectedSlot({ date, heure });
+    setShowConfirm(true);
+  };
+
+  const createCreneau = async (date, heure) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const dateFormatee = `${year}-${month}-${day}`;    
+    const heureFormatee = heure + ":00";
+
+    const { data, error } = await supabase
+      .from("creneaux")
+      .insert([
+        { date: dateFormatee, heure: heureFormatee, statut: "disponible" },
+      ])
+      .select();
+
+    if (error) {
+      console.error("Erreur création créneau :", error);
+    } else {
+      setCreneaux([...creneaux, data[0]]);
+      setShowConfirm(false);
+    }
   };
 
   // Chargement des créneaux de la semaine
@@ -93,8 +124,7 @@ function CalendarInvite() {
 
   return (
     <div>
-      <h1>Planning Invité</h1>
-
+      <h1> Admin connecté </h1>
       {/* Navigation semaine */}
       <div className="flex items-center justify-between mb-6">
         <button
@@ -145,19 +175,17 @@ function CalendarInvite() {
 
                 {joursSemaine.map((date, i) => {
                   const creneau = findCreneau(date, heure);
-                  const bgColor = creneau ? "bg-green-400" : "bg-gray-50";
-                  const isAvailable =
-                    creneau && creneau.statut === "disponible";
+                  const bgColor = creneau
+                    ? creneau.statut === "disponible"
+                      ? "bg-green-400"
+                      : "bg-red-400"
+                    : "hover:bg-gray-100";
 
                   return (
                     <td
                       key={i}
-                      onClick={() => {
-                        if (isAvailable) setShowConfirm(true);
-                      }}
-                      className={`border p-4 text-center ${bgColor} ${
-                        isAvailable ? "cursor-pointer" : ""
-                      }`}
+                      onClick={() => handleClickCase(date, heure)}
+                      className={`border p-4 cursor-pointer text-center ${bgColor}`}
                     >
                       {creneau ? creneau.statut : ""}
                     </td>
@@ -170,11 +198,15 @@ function CalendarInvite() {
       </div>
 
       {/* Modal de confirmation */}
-      {showConfirm && (
+      {showConfirm && selectedSlot && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
           <div className="bg-white p-6 rounded shadow-lg">
             <h2 className="text-lg font-bold mb-4">
-              Pour vous inscrire veuillez vous connecté
+              Créer un créneau le{" "}
+              <span className="text-blue-600">
+                {selectedSlot.date.toLocaleDateString("fr-FR")}
+              </span>{" "}
+              à <span className="text-blue-600">{selectedSlot.heure}</span> ?
             </h2>
             <div className="flex justify-end gap-4">
               <button
@@ -184,7 +216,9 @@ function CalendarInvite() {
                 Non
               </button>
               <button
-                onClick={() => navigate("/login")}
+                onClick={() =>
+                  createCreneau(selectedSlot.date, selectedSlot.heure)
+                }
                 className="px-4 py-2 bg-blue-600 text-white rounded"
               >
                 Oui
@@ -197,4 +231,4 @@ function CalendarInvite() {
   );
 }
 
-export default CalendarInvite;
+export default CalendarAdmin;
