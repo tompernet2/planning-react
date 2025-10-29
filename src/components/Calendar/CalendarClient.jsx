@@ -182,14 +182,17 @@ function CalendarClient() {
         if (creneauxError) throw creneauxError;
         setCreneaux(creneauxData || []);
 
-        // 3️⃣ Récupération de l'utilisateur connecté
         const {
           data: { session },
         } = await supabase.auth.getSession();
-        if (!session) return;
 
         // 4️⃣ Récupération des demandes acceptées du client
-        const creneauIds = (creneauxData || []).map((c) => c.id);
+        const creneauIds = [];
+        if (creneauxData && creneauxData.length > 0) {
+          for (const creneau of creneauxData) {
+            creneauIds.push(creneau.id);
+          }
+        }
         if (creneauIds.length === 0) {
           setMesAcceptedCreneauIds([]);
           return;
