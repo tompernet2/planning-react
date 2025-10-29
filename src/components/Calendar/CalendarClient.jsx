@@ -1,7 +1,7 @@
+// src/components/CalendarClient.jsx
 import React, { useEffect, useState } from "react";
 import { CgArrowLeftR, CgArrowRightR } from "react-icons/cg";
 import supabase from "../../helper/supabaseClient";
-//import { useNavigate } from "react-router-dom";
 
 function CalendarClient() {
   const [creneaux, setCreneaux] = useState([]);
@@ -9,8 +9,7 @@ function CalendarClient() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [alreadyRegistered, setAlreadyRegistered] = useState(false);
-
-  //const navigate = useNavigate();
+  const [mesAcceptedCreneauIds, setMesAcceptedCreneauIds] = useState([]);
 
   const heures = [
     "09:00",
@@ -45,7 +44,13 @@ function CalendarClient() {
     return jours;
   };
 
-  // Navigation
+  const formatDate = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
   const semainePrecedente = () => {
     const newDate = new Date(currentDate);
     newDate.setDate(currentDate.getDate() - 7);
@@ -58,47 +63,18 @@ function CalendarClient() {
     setCurrentDate(newDate);
   };
 
-  // Chargement des créneaux de la semaine
-  useEffect(() => {
-    const fetchCreneaux = async () => {
-      const debut = getDebutSemaine(currentDate);
-      const fin = new Date(debut);
-      fin.setDate(debut.getDate() + 6);
-
-      const { data, error } = await supabase
-        .from("creneaux")
-        .select("*")
-        .gte("date", debut.toISOString().split("T")[0])
-        .lte("date", fin.toISOString().split("T")[0]);
-
-      if (error) {
-        console.error("Erreur chargement créneaux :", error);
-      } else {
-        setCreneaux(data || []);
-      }
-    };
-
-    fetchCreneaux();
-  }, [currentDate]);
-
-  const joursSemaine = getJoursSemaine();
-
+  // Trouve un créneau dans la liste chargée (pour affichage)
   const findCreneau = (date, heure) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const dateFormatee = `${year}-${month}-${day}`;
+    const dateFormatee = formatDate(date);
     return creneaux.find((c) => {
       const heureDB = c.heure.substring(0, 5);
       return c.date === dateFormatee && heureDB === heure;
     });
   };
 
+  // Récupère l'ID d'un créneau depuis la DB
   const findCreneauId = async (date, heure) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const dateFormatee = `${year}-${month}-${day}`;
+    const dateFormatee = formatDate(date);
     const heureFormatee = heure + ":00";
 
     const { data, error } = await supabase
@@ -110,17 +86,18 @@ function CalendarClient() {
 
     if (error) {
       console.error("Erreur id non trouvé :", error);
-    } else {
-      return data.id;
+      return null;
     }
+    return data.id;
   };
 
-  // Vérifier si l'utilisateur est déjà inscrit à ce créneau
-  const checkIfAlreadyRegistered = async (creneauId) => {
+  // Vérifie si l'utilisateur est déjà inscrit à ce créneau
+  const checkIsRegistered = async (creneauId) => {
     const {
       data: { session },
     } = await supabase.auth.getSession();
 
+    // Chercher si une demande existe pour ce créneau et cet utilisateur
     const { data, error } = await supabase
       .from("demandes")
       .select("*")
@@ -132,16 +109,19 @@ function CalendarClient() {
       return false;
     }
 
-    return data && data.length > 0;
+    if (data && data.length > 0) {
+      return true;
+    } else {
+      return false;
+    }
   };
 
+  // Crée une nouvelle demande de réservation
   const createDemande = async (creneauId) => {
     const {
       data: { session },
     } = await supabase.auth.getSession();
 
-    console.log("creneauId =", creneauId);
-    console.log("session.user.id =", session.user.id);
     const { error } = await supabase.from("demandes").insert([
       {
         creneau_id: creneauId,
@@ -154,33 +134,89 @@ function CalendarClient() {
       console.error("Erreur création demande :", error);
     } else {
       setShowConfirm(false);
-      console.log("Demande créé");
+      setCurrentDate(new Date(currentDate)); // Force le rechargement car
+      console.log("Demande créée");
     }
   };
 
+  // Gère le clic sur un créneau disponible
   const handleSlotClick = async (date, heure) => {
     const creneauId = await findCreneauId(date, heure);
-    if (creneauId) {
-      const isRegistered = await checkIfAlreadyRegistered(creneauId);
-      setAlreadyRegistered(isRegistered);
-      setSelectedSlot({ date, heure });
-      setShowConfirm(true);
-    } else {
-      console.error("Créneau non trouvé !");
-    }
+
+    const isRegistered = await checkIsRegistered(creneauId);
+    setAlreadyRegistered(isRegistered);
+    setSelectedSlot({ date, heure });
+    setShowConfirm(true);
   };
 
+  // Confirme la réservation
   const handleConfirm = async () => {
     const creneauId = await findCreneauId(
       selectedSlot.date,
       selectedSlot.heure
     );
+
     if (creneauId) {
       await createDemande(creneauId);
     } else {
       console.error("Créneau non trouvé !");
     }
   };
+
+  useEffect(() => {
+    const fetchCreneauxEtDemandes = async () => {
+      try {
+        const debut = getDebutSemaine(currentDate);
+        const fin = new Date(debut);
+        fin.setDate(debut.getDate() + 6);
+
+        const debutStr = debut.toISOString().split("T")[0];
+        const finStr = fin.toISOString().split("T")[0];
+
+        const { data: creneauxData, error: creneauxError } = await supabase
+          .from("creneaux")
+          .select("*")
+          .gte("date", debutStr)
+          .lte("date", finStr);
+
+        if (creneauxError) throw creneauxError;
+        setCreneaux(creneauxData || []);
+
+        // 3️⃣ Récupération de l'utilisateur connecté
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        if (!session) return;
+
+        // 4️⃣ Récupération des demandes acceptées du client
+        const creneauIds = (creneauxData || []).map((c) => c.id);
+        if (creneauIds.length === 0) {
+          setMesAcceptedCreneauIds([]);
+          return;
+        }
+
+        const { data: demandesData, error: demandesError } = await supabase
+          .from("demandes")
+          .select("creneau_id")
+          .in("creneau_id", creneauIds)
+          .eq("client_id", session.user.id)
+          .eq("statut", "accepte");
+
+        if (demandesError) throw demandesError;
+
+        const acceptedIds = (demandesData || []).map((d) => d.creneau_id);
+        setMesAcceptedCreneauIds(acceptedIds);
+      } catch (err) {
+        console.error("Erreur dans le chargement du planning :", err);
+        setCreneaux([]);
+        setMesAcceptedCreneauIds([]);
+      }
+    };
+
+    fetchCreneauxEtDemandes();
+  }, [currentDate]);
+
+  const joursSemaine = getJoursSemaine();
 
   return (
     <div>
@@ -236,23 +272,42 @@ function CalendarClient() {
 
                 {joursSemaine.map((date, i) => {
                   const creneau = findCreneau(date, heure);
-                  const bgColor = creneau ? "bg-green-400" : "bg-gray-50";
-                  const isAvailable =
-                    creneau && creneau.statut === "disponible";
+
+                  // Logique d'affichage des couleurs et texte
+                  let bgColor = "cursor-default";
+                  let text = "";
+
+                  if (creneau) {
+                    if (creneau.statut === "disponible") {
+                      bgColor = "bg-green-400 cursor-pointer";
+                      text = "disponible";
+                    } else {
+                      // Créneau occupé : vérifier si c'est réservé par l'utilisateur
+                      const isMineAccepted = mesAcceptedCreneauIds.includes(
+                        creneau.id
+                      );
+
+                      if (isMineAccepted) {
+                        bgColor = "bg-blue-500 text-white cursor-default";
+                        text = "réservé";
+                      } else {
+                        bgColor = "bg-red-500 text-white cursor-default";
+                        text = "occupé";
+                      }
+                    }
+                  }
+
+                  const isAvailable = creneau?.statut === "disponible";
 
                   return (
                     <td
                       key={i}
-                      onClick={() => {
-                        if (isAvailable) {
-                          handleSlotClick(date, heure);
-                        }
-                      }}
-                      className={`border p-4 text-center ${bgColor} ${
-                        isAvailable ? "cursor-pointer" : ""
-                      }`}
+                      onClick={() =>
+                        isAvailable && handleSlotClick(date, heure)
+                      }
+                      className={`border p-4 text-center ${bgColor}`}
                     >
-                      {creneau ? creneau.statut : ""}
+                      {text}
                     </td>
                   );
                 })}
@@ -267,7 +322,6 @@ function CalendarClient() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
           <div className="bg-white p-6 rounded shadow-lg">
             {alreadyRegistered ? (
-              // Modal si déjà inscrit
               <>
                 <h2 className="text-lg font-bold mb-4">
                   Vous êtes déjà inscrit
@@ -282,7 +336,6 @@ function CalendarClient() {
                 </div>
               </>
             ) : (
-              // Modal pour nouvelle inscription
               <>
                 <h2 className="text-lg font-bold mb-4">
                   Voulez vous vous inscrire ?
@@ -295,11 +348,7 @@ function CalendarClient() {
                     Non
                   </button>
                   <button
-                    onClick={() => {
-                      if (selectedSlot) {
-                        handleConfirm();
-                      }
-                    }}
+                    onClick={handleConfirm}
                     className="px-4 py-2 bg-blue-600 text-white rounded"
                   >
                     Oui

@@ -177,15 +177,15 @@ function CalendarAdmin() {
                   const creneau = findCreneau(date, heure);
                   const bgColor = creneau
                     ? creneau.statut === "disponible"
-                      ? "bg-green-400"
-                      : "bg-red-400"
-                    : "hover:bg-gray-100";
+                      ? "bg-green-400 cursor-default"
+                      : "bg-red-400 cursor-default"
+                    : "hover:bg-gray-100 cursor-pointer";
 
                   return (
                     <td
                       key={i}
                       onClick={() => handleClickCase(date, heure)}
-                      className={`border p-4 cursor-pointer text-center ${bgColor}`}
+                      className={`border p-4 text-center ${bgColor}`}
                     >
                       {creneau ? creneau.statut : ""}
                     </td>

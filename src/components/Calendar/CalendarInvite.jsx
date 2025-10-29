@@ -145,7 +145,11 @@ function CalendarInvite() {
 
                 {joursSemaine.map((date, i) => {
                   const creneau = findCreneau(date, heure);
-                  const bgColor = creneau ? "bg-green-400" : "bg-gray-50";
+                  const bgColor = creneau
+                    ? creneau.statut === "disponible"
+                      ? "bg-green-400"
+                      : "bg-red-400 cursor-default"
+                    : "hover:bg-gray-100";
                   const isAvailable =
                     creneau && creneau.statut === "disponible";
 
