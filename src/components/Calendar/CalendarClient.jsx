@@ -8,8 +8,8 @@ function CalendarClient() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showConfirm, setShowConfirm] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState(null);
-  const [alreadyRegistered, setAlreadyRegistered] = useState(false);
   const [mesAcceptedCreneauIds, setMesAcceptedCreneauIds] = useState([]);
+  const [mesPendingCreneauIds, setMesPendingCreneauIds] = useState([]);
 
   const heures = [
     "09:00",
@@ -63,7 +63,6 @@ function CalendarClient() {
     setCurrentDate(newDate);
   };
 
-  // Trouve un créneau dans la liste chargée (pour affichage)
   const findCreneau = (date, heure) => {
     const dateFormatee = formatDate(date);
     return creneaux.find((c) => {
@@ -72,7 +71,6 @@ function CalendarClient() {
     });
   };
 
-  // Récupère l'ID d'un créneau depuis la DB
   const findCreneauId = async (date, heure) => {
     const dateFormatee = formatDate(date);
     const heureFormatee = heure + ":00";
@@ -91,32 +89,6 @@ function CalendarClient() {
     return data.id;
   };
 
-  // Vérifie si l'utilisateur est déjà inscrit à ce créneau
-  const checkIsRegistered = async (creneauId) => {
-    const {
-      data: { session },
-    } = await supabase.auth.getSession();
-
-    // Chercher si une demande existe pour ce créneau et cet utilisateur
-    const { data, error } = await supabase
-      .from("demandes")
-      .select("*")
-      .eq("creneau_id", creneauId)
-      .eq("client_id", session.user.id);
-
-    if (error) {
-      console.error("Erreur vérification inscription :", error);
-      return false;
-    }
-
-    if (data && data.length > 0) {
-      return true;
-    } else {
-      return false;
-    }
-  };
-
-  // Crée une nouvelle demande de réservation
   const createDemande = async (creneauId) => {
     const {
       data: { session },
@@ -134,22 +106,16 @@ function CalendarClient() {
       console.error("Erreur création demande :", error);
     } else {
       setShowConfirm(false);
-      setCurrentDate(new Date(currentDate)); // Force le rechargement car
+      setCurrentDate(new Date(currentDate));
       console.log("Demande créée");
     }
   };
 
-  // Gère le clic sur un créneau disponible
-  const handleSlotClick = async (date, heure) => {
-    const creneauId = await findCreneauId(date, heure);
-
-    const isRegistered = await checkIsRegistered(creneauId);
-    setAlreadyRegistered(isRegistered);
+  const handleSlotClick = (date, heure) => {
     setSelectedSlot({ date, heure });
     setShowConfirm(true);
   };
 
-  // Confirme la réservation
   const handleConfirm = async () => {
     const creneauId = await findCreneauId(
       selectedSlot.date,
@@ -186,33 +152,37 @@ function CalendarClient() {
           data: { session },
         } = await supabase.auth.getSession();
 
-        // 4️⃣ Récupération des demandes acceptées du client
-        const creneauIds = [];
-        if (creneauxData && creneauxData.length > 0) {
-          for (const creneau of creneauxData) {
-            creneauIds.push(creneau.id);
-          }
-        }
+        if (!session?.user?.id) return;
+
+        const creneauIds = (creneauxData || []).map((c) => c.id);
         if (creneauIds.length === 0) {
           setMesAcceptedCreneauIds([]);
+          setMesPendingCreneauIds([]);
           return;
         }
 
-        const { data: demandesData, error: demandesError } = await supabase
+        const { data: acceptedData } = await supabase
           .from("demandes")
           .select("creneau_id")
           .in("creneau_id", creneauIds)
           .eq("client_id", session.user.id)
           .eq("statut", "accepte");
 
-        if (demandesError) throw demandesError;
+        setMesAcceptedCreneauIds((acceptedData || []).map((d) => d.creneau_id));
 
-        const acceptedIds = (demandesData || []).map((d) => d.creneau_id);
-        setMesAcceptedCreneauIds(acceptedIds);
+        const { data: pendingData } = await supabase
+          .from("demandes")
+          .select("creneau_id")
+          .in("creneau_id", creneauIds)
+          .eq("client_id", session.user.id)
+          .eq("statut", "en_attente");
+
+        setMesPendingCreneauIds((pendingData || []).map((d) => d.creneau_id));
       } catch (err) {
         console.error("Erreur dans le chargement du planning :", err);
         setCreneaux([]);
         setMesAcceptedCreneauIds([]);
+        setMesPendingCreneauIds([]);
       }
     };
 
@@ -225,7 +195,6 @@ function CalendarClient() {
     <div>
       <h1>Planning Client</h1>
 
-      {/* Navigation semaine */}
       <div className="flex items-center justify-between mb-6">
         <button
           onClick={semainePrecedente}
@@ -248,7 +217,6 @@ function CalendarClient() {
         </button>
       </div>
 
-      {/* Grille calendrier */}
       <div className="overflow-x-auto">
         <table className="w-full border">
           <thead>
@@ -276,37 +244,35 @@ function CalendarClient() {
                 {joursSemaine.map((date, i) => {
                   const creneau = findCreneau(date, heure);
 
-                  // Logique d'affichage des couleurs et texte
                   let bgColor = "cursor-default";
                   let text = "";
 
                   if (creneau) {
-                    if (creneau.statut === "disponible") {
+                    if (mesAcceptedCreneauIds.includes(creneau.id)) {
+                      bgColor = "bg-blue-500 text-white cursor-default";
+                      text = "réservé";
+                    } else if (mesPendingCreneauIds.includes(creneau.id)) {
+                      bgColor = "bg-yellow-400 text-black cursor-default";
+                      text = "inscrit";
+                    } else if (creneau.statut === "disponible") {
                       bgColor = "bg-green-400 cursor-pointer";
                       text = "disponible";
                     } else {
-                      // Créneau occupé : vérifier si c'est réservé par l'utilisateur
-                      const isMineAccepted = mesAcceptedCreneauIds.includes(
-                        creneau.id
-                      );
-
-                      if (isMineAccepted) {
-                        bgColor = "bg-blue-500 text-white cursor-default";
-                        text = "réservé";
-                      } else {
-                        bgColor = "bg-red-500 text-white cursor-default";
-                        text = "occupé";
-                      }
+                      bgColor = "bg-red-500 text-white cursor-default";
+                      text = "occupé";
                     }
                   }
 
-                  const isAvailable = creneau?.statut === "disponible";
+                  const canClick =
+                    creneau?.statut === "disponible" &&
+                    !mesAcceptedCreneauIds.includes(creneau.id) &&
+                    !mesPendingCreneauIds.includes(creneau.id);
 
                   return (
                     <td
                       key={i}
                       onClick={() =>
-                        isAvailable && handleSlotClick(date, heure)
+                        canClick && handleSlotClick(date, heure)
                       }
                       className={`border p-4 text-center ${bgColor}`}
                     >
@@ -320,45 +286,26 @@ function CalendarClient() {
         </table>
       </div>
 
-      {/* Modal de confirmation */}
       {showConfirm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
           <div className="bg-white p-6 rounded shadow-lg">
-            {alreadyRegistered ? (
-              <>
-                <h2 className="text-lg font-bold mb-4">
-                  Vous êtes déjà inscrit
-                </h2>
-                <div className="flex justify-end">
-                  <button
-                    onClick={() => setShowConfirm(false)}
-                    className="px-4 py-2 bg-gray-300 rounded"
-                  >
-                    Fermer
-                  </button>
-                </div>
-              </>
-            ) : (
-              <>
-                <h2 className="text-lg font-bold mb-4">
-                  Voulez vous vous inscrire ?
-                </h2>
-                <div className="flex justify-end gap-4">
-                  <button
-                    onClick={() => setShowConfirm(false)}
-                    className="px-4 py-2 bg-gray-300 rounded"
-                  >
-                    Non
-                  </button>
-                  <button
-                    onClick={handleConfirm}
-                    className="px-4 py-2 bg-blue-600 text-white rounded"
-                  >
-                    Oui
-                  </button>
-                </div>
-              </>
-            )}
+            <h2 className="text-lg font-bold mb-4">
+              Voulez vous vous inscrire ?
+            </h2>
+            <div className="flex justify-end gap-4">
+              <button
+                onClick={() => setShowConfirm(false)}
+                className="px-4 py-2 bg-gray-300 rounded"
+              >
+                Non
+              </button>
+              <button
+                onClick={handleConfirm}
+                className="px-4 py-2 bg-blue-600 text-white rounded"
+              >
+                Oui
+              </button>
+            </div>
           </div>
         </div>
       )}
