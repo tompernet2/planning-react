@@ -32,9 +32,9 @@ function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+    <div className="min-h-screen flex items-center justify-center px-4">
       <div className="bg-white shadow-lg rounded-2xl p-8 w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
+        <h2 className="text-2xl font-bold text-center text-secondary mb-6">
           Créer un compte
         </h2>
 
@@ -51,7 +51,7 @@ function Register() {
             type="email"
             placeholder="Adresse email"
             required
-            className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-gray-700"
+            className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-secondary"
           />
 
           <input
@@ -60,12 +60,12 @@ function Register() {
             type="password"
             placeholder="Mot de passe"
             required
-            className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-gray-700"
+            className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-secondary"
           />
 
           <button
             type="submit"
-            className="bg-gray-800 text-white py-2 rounded-lg hover:bg-gray-700 transition-colors"
+            className="bg-secondary text-white py-2 rounded-lg hover:bg-secondary-100 transition-colors"
           >
             Créer un compte
           </button>
@@ -75,7 +75,7 @@ function Register() {
           <span>Déjà un compte ? </span>
           <Link
             to="/login"
-            className="text-gray-800 font-semibold hover:underline"
+            className="text-secondary font-semibold hover:underline"
           >
             Se connecter
           </Link>

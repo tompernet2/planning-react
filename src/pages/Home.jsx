@@ -42,7 +42,7 @@ function Home() {
   }, []);
 
   return (
-    <div className="p-6 m-6 bg-white rounded shadow">
+    <div className="p-4 m-5 ">
       {role === "admin" && <CalendarAdmin />}
       {role === "client" && <CalendarClient />}
       {/* Si aucun utilisateur n'est connecté ou rôle inconnu, on affiche l'invité */}

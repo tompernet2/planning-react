@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { CgArrowLeftR, CgArrowRightR } from "react-icons/cg";
+import { AiOutlineLeft, AiOutlineRight } from "react-icons/ai";
 import supabase from "../../helper/supabaseClient";
 import { useNavigate } from "react-router-dom";
 
@@ -82,9 +82,9 @@ function CalendarInvite() {
 
   const findCreneau = (date, heure) => {
     const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const dateFormatee = `${year}-${month}-${day}`;   
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const dateFormatee = `${year}-${month}-${day}`;
     return creneaux.find((c) => {
       const heureDB = c.heure.substring(0, 5);
       return c.date === dateFormatee && heureDB === heure;
@@ -93,110 +93,152 @@ function CalendarInvite() {
 
   return (
     <div>
-      <h1>Planning Invité</h1>
+      <h1 className="text-2xl font-bold mb-4">Planning Hebdomadaire</h1>
 
-      {/* Navigation semaine */}
-      <div className="flex items-center justify-between mb-6">
-        <button
-          onClick={semainePrecedente}
-          className="flex items-center p-2 bg-gray-200 rounded hover:bg-gray-300"
-        >
-          <CgArrowLeftR className="w-5 h-5 mr-2" />
-          Précédent
-        </button>
+      <div className="rounded-2xl bg-white p-4  ">
+        {/* Navigation semaine */}
+        <div className="flex items-center justify-between mb-6">
+          {/* Mois et Année */}
+          <div className="text-2xl font-bold text-secondary flex items-center gap-2">
+            <span>
+              {joursSemaine[3]
+                .toLocaleDateString("fr-FR", {
+                  month: "long",
+                })
+                .replace(/^\w/, (c) => c.toUpperCase())}
+            </span>
+            <span>{joursSemaine[3].getFullYear()}</span>
+          </div>
+          {/* Nav */}
+          <div className="flex items-center gap-1 rounded-xl overflow-hidden text-cream">
+            <button
+              onClick={semainePrecedente}
+              className="flex items-center p-3 bg-secondary cursor-pointer rounded hover:bg-secondary-100"
+            >
+              <AiOutlineLeft className="w-5 h-5" />
+            </button>
 
-        <h2 className="text-xl font-bold">
-          Semaine du {joursSemaine[0].toLocaleDateString("fr-FR")}
-        </h2>
-
-        <button
-          onClick={semaineSuivante}
-          className="flex items-center p-2 bg-gray-200 rounded hover:bg-gray-300"
-        >
-          Suivant
-          <CgArrowRightR className="w-5 h-5 ml-2" />
-        </button>
-      </div>
-
-      {/* Grille calendrier */}
-      <div className="overflow-x-auto">
-        <table className="w-full border">
-          <thead>
-            <tr>
-              <th className="border p-2 bg-gray-100">Heure</th>
-              {joursSemaine.map((date, i) => (
-                <th key={i} className="border p-2 bg-gray-100 w-1/7">
-                  {date.toLocaleDateString("fr-FR", {
-                    weekday: "long",
-                    day: "numeric",
-                    month: "short",
-                  })}
-                </th>
-              ))}
-            </tr>
-          </thead>
-
-          <tbody>
-            {heures.map((heure) => (
-              <tr key={heure}>
-                <td className="border p-2 font-medium text-center bg-gray-50">
-                  {heure}
-                </td>
-
-                {joursSemaine.map((date, i) => {
-                  const creneau = findCreneau(date, heure);
-                  const bgColor = creneau
-                    ? creneau.statut === "disponible"
-                      ? "bg-green-400"
-                      : "bg-red-400 cursor-default"
-                    : "hover:bg-gray-100";
-                  const isAvailable =
-                    creneau && creneau.statut === "disponible";
-
-                  return (
-                    <td
-                      key={i}
-                      onClick={() => {
-                        if (isAvailable) setShowConfirm(true);
-                      }}
-                      className={`border p-4 text-center ${bgColor} ${
-                        isAvailable ? "cursor-pointer" : ""
-                      }`}
-                    >
-                      {creneau ? creneau.statut : ""}
-                    </td>
-                  );
+            <div className="h-full bg-secondary px-2">
+              <h2 className="text-xl p-2">
+                {joursSemaine[0].toLocaleDateString("fr-FR", {
+                  month: "short",
+                  day: "numeric",
+                })}{" "}
+                -{" "}
+                {joursSemaine[6].toLocaleDateString("fr-FR", {
+                  month: "short",
+                  day: "numeric",
                 })}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+              </h2>
+            </div>
 
-      {/* Modal de confirmation */}
-      {showConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded shadow-lg">
-            <h2 className="text-lg font-bold mb-4">
-              Pour vous inscrire veuillez vous connecté
-            </h2>
-            <div className="flex justify-end gap-4">
-              <button
-                onClick={() => setShowConfirm(false)}
-                className="px-4 py-2 bg-gray-300 rounded"
-              >
-                Non
-              </button>
-              <button
-                onClick={() => navigate("/login")}
-                className="px-4 py-2 bg-blue-600 text-white rounded"
-              >
-                Oui
-              </button>
+            <button
+              onClick={semaineSuivante}
+              className="flex items-center p-3 bg-secondary cursor-pointer rounded hover:bg-secondary-100"
+            >
+              <AiOutlineRight className="w-5 h-5" />
+            </button>
+          </div>
+          <div className="w-16"></div> {/* Spacer pour équilibrer */}
+        </div>
+
+        {/* Grille calendrier */}
+        <div className="rounded-2xl border border-gray-300 overflow-hidden">
+          <table className="w-full table-fixed">
+            <thead>
+              <tr>
+                <th className="border-r border-b border-gray-300 p-2 w-20">
+                  Heure
+                </th>
+                {joursSemaine.map((date, i) => (
+                  <th
+                    key={i}
+                    className={`border-b border-gray-300 p-2 ${
+                      i < 6 ? "border-r" : ""
+                    }`}
+                  >
+                    {date.toLocaleDateString("fr-FR", {
+                      weekday: "short",
+                      day: "numeric",
+                    })}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+
+            <tbody>
+              {heures.map((heure, index) => (
+                <tr key={heure}>
+                  <td
+                    className={`border-r border-gray-300 text-gray-500 p-4 font-medium align-top h-24 ${
+                      index < heures.length - 1 ? "border-b" : ""
+                    }`}
+                  >
+                    {heure}
+                  </td>
+
+                  {joursSemaine.map((date, i) => {
+                    const creneau = findCreneau(date, heure);
+                    const isAvailable =
+                      creneau && creneau.statut === "disponible";
+
+                    return (
+                      <td
+                        key={i}
+                        className={`p-0.5 h-24 ${i < 6 ? "border-r" : ""} ${
+                          index < heures.length - 1 ? "border-b" : ""
+                        } border-gray-300`}
+                      >
+                        {creneau ? (
+                          <div
+                            onClick={() => {
+                              if (isAvailable) setShowConfirm(true);
+                            }}
+                            className={`rounded-xl h-full w-full flex items-center justify-center text-sm ${
+                              isAvailable
+                                ? "bg-green-400 text-white cursor-pointer hover:bg-green-500"
+                                : "bg-red-400 text-white"
+                            }`}
+                          >
+                            {creneau.statut}
+                          </div>
+                        ) : (
+                          <div className="h-full w-full"></div>
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Modal de confirmation */}
+        {showConfirm && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
+            <div className="bg-white p-6 rounded shadow-lg">
+              <h2 className="text-lg font-bold mb-4">
+                Pour vous inscrire veuillez vous connecté
+              </h2>
+              <div className="flex justify-end gap-4">
+                <button
+                  onClick={() => setShowConfirm(false)}
+                  className="px-4 py-2 bg-gray-300 rounded"
+                >
+                  Non
+                </button>
+                <button
+                  onClick={() => navigate("/login")}
+                  className="px-4 py-2 bg-blue-600 text-white rounded"
+                >
+                  Oui
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

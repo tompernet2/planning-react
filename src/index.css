@@ -26,7 +26,27 @@ body {
   --color-primary: #B3EBF2; 
   --color-primary-100: #D6F4F8; 
   --color-secondary: #2A2E32; 
-  --color-secondary-100: #3D4248; 
+  --color-secondary-100: #4F575E; 
   --color-cream: #F3F3ED; 
 
+
+}
+
+:root {
+  /* ROUGE */
+  --color-red: #F8B8B8;           /* fond pastel rouge */
+  --color-red-100: #D95353;       /* texte / bordure plus foncé */
+
+  /* VERT */
+  --color-green: #B8F2B8;         /* fond pastel vert */
+  --color-green-hover: #D6FFD6;   /* hover plus clair */
+  --color-green-100: #2E8B2E;     /* texte / bordure plus foncé */
+
+  /* JAUNE */
+  --color-yellow: #FFF4B8;        /* fond pastel jaune */
+  --color-yellow-100: #D4C354;    /* texte / bordure plus foncé */
+
+  /* BLEU */
+  --color-blue: #B8E0F8;          /* fond pastel bleu */
+  --color-blue-100: #2E6FD4;      /* texte / bordure plus foncé */
 }
