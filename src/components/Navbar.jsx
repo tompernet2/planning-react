@@ -29,12 +29,15 @@ function Navbar() {
   }, []);
 
   return (
-    <div className="w-64 bg-white text-black flex flex-col p-4">
+    <div className="fixed flex flex-col w-64 bg-secondary rounded-2xl text-cream p-4 m-5" style={{ height: "calc(100vh - 2.5rem)" }}>
+      <div className="w-full text-3xl  p-3 font-secondary">
+        <h1>Planify</h1>
+      </div>
       <NavLink
         to="/dashboard"
         className={({ isActive }) =>
-          `rounded p-2 hover:bg-gray-200 transition ${
-            isActive ? "bg-gray-300 font-semibold" : ""
+          `rounded-2xl px-3 py-2 hover:bg-primary hover:text-secondary transition ${
+            isActive ? "bg-primary hover:bg-primary-100 text-black" : ""
           } flex items-center`
         }
       >
@@ -45,8 +48,8 @@ function Navbar() {
       <NavLink
         to="/"
         className={({ isActive }) =>
-          `rounded p-2 hover:bg-gray-200 transition ${
-            isActive ? "bg-gray-300 font-semibold" : ""
+          `rounded-2xl px-3 py-2 hover:bg-primary hover:text-secondary transition ${
+            isActive ? "bg-primary hover:bg-primary-100 text-black" : ""
           } flex items-center`
         }
       >
@@ -58,8 +61,8 @@ function Navbar() {
         <NavLink
           to="/demandes"
           className={({ isActive }) =>
-            `rounded p-2 hover:bg-gray-200 transition ${
-              isActive ? "bg-gray-300 font-semibold" : ""
+            `rounded-2xl px-3 py-2 hover:bg-primary hover:text-secondary transition ${
+              isActive ? "bg-primary hover:bg-primary-100 text-black" : ""
             } flex items-center`
           }
         >

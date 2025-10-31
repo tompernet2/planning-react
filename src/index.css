@@ -1,1 +1,32 @@
 @import "tailwindcss";
+
+@font-face {
+    font-family: Sora;
+    src: url("/fonts/Sora-Regular.ttf");
+}
+@font-face {
+    font-family: Silka;
+    src: url("/src/assets/fonts/Silka-Medium.ttf");
+}
+
+
+@theme{
+    --font-primary: Silka, sans-serif;
+    --font-secondary: Sora, sans-serif;
+}
+
+body {
+  font-family: var(--font-primary);
+  background-color: #F3F3ED;
+}
+
+
+
+@theme {
+  --color-primary: #B3EBF2; 
+  --color-primary-100: #D6F4F8; 
+  --color-secondary: #2A2E32; 
+  --color-secondary-100: #3D4248; 
+  --color-cream: #F3F3ED; 
+
+}

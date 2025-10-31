@@ -50,14 +50,11 @@ function Dashboard() {
   if (!user) return null;
 
   return (
-    <div className="p-6 m-6 bg-white rounded shadow">
-      <h1 className="text-2xl font-bold mb-4">Mon Compte</h1>
-      <div className=" text-gray-800">
+    <div className="p-4 m-5 rounded-2xl">
+      <h1 className="text-2xl font-bold mb-4">Bonjour,</h1>
+      <div className="bg-white text-gray-800 p-4 rounded-2xl min-w-80 inline-block">
         <p className="mb-2">
           <strong>Email :</strong> {user.email}
-        </p>
-        <p className="mb-2">
-          <strong>ID :</strong> {user.id}
         </p>
         <p className="mb-4">
           <strong>Rôle :</strong> {role}
@@ -65,7 +62,7 @@ function Dashboard() {
 
         <button
           onClick={handleSignOut}
-          className="mt-4 bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-700"
+          className="mt-4 bg-secondary text-white px-4 py-2 rounded-2xl hover:bg-secondary-100"
         >
           Déconnexion
         </button>

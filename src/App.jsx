@@ -15,7 +15,7 @@ function App() {
     <BrowserRouter>
       <div className="flex min-h-screen">
         <Navbar />
-        <main className="flex-1 bg-gray-50">
+        <main className="flex-1 ml-69">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/register" element={<Register />} />
