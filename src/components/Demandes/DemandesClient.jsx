@@ -74,67 +74,65 @@ function DemandesClient() {
     <div>
       <h2 className="text-2xl font-bold mb-4">Mes demandes</h2>
 
-      <div className="">
-        <div className="rounded-2xl  overflow-hidden bg-white">
-          <table className="w-full table-fixed ">
-            <thead>
-              <tr>
-                <th className="p-4 text-left">Date</th>
-                <th className="p-4 text-left">Heure</th>
-                <th className="p-4 text-left">Statut</th>
-                <th className="p-4 text-left">Action</th>
-              </tr>
-            </thead>
+      <div className="rounded-2xl  overflow-hidden bg-white">
+        <table className="w-full table-fixed ">
+          <thead>
+            <tr>
+              <th className="p-4 text-left">Date</th>
+              <th className="p-4 text-left">Heure</th>
+              <th className="p-4 text-left">Statut</th>
+              <th className="p-4 text-left">Action</th>
+            </tr>
+          </thead>
 
-            <tbody>
-              {demandes.map((d) => (
-                <tr key={d.id}>
-                  <td className="border-t border-gray-300 p-4">
-                    {d.creneau.date}
-                  </td>
-                  <td className="border-t border-gray-300 p-4">
-                    {d.creneau.heure}
-                  </td>
-                  <td className="border-t border-gray-300 p-4">
-                    <span
-                      className={
-                        d.statut === "accepte"
-                          ? "text-green-600 font-medium"
-                          : d.statut === "refuse"
-                          ? "text-red-600 font-medium"
-                          : "text-orange-600 font-medium"
+          <tbody>
+            {demandes.map((d) => (
+              <tr key={d.id}>
+                <td className="border-t border-gray-300 p-4">
+                  {d.creneau.date}
+                </td>
+                <td className="border-t border-gray-300 p-4">
+                  {d.creneau.heure}
+                </td>
+                <td className="border-t border-gray-300 p-4">
+                  <span
+                    className={
+                      d.statut === "accepte"
+                        ? "text-green-600 font-medium"
+                        : d.statut === "refuse"
+                        ? "text-red-600 font-medium"
+                        : "text-orange-600 font-medium"
+                    }
+                  >
+                    {d.statut.charAt(0).toUpperCase() + d.statut.slice(1)}
+                  </span>
+                </td>
+                <td className="border-t border-gray-300 p-2">
+                  {(d.statut === "en_attente" || d.statut === "accepte") && (
+                    <button
+                      onClick={() =>
+                        desinscrireDemande(d.id, d.creneau.id, d.statut)
                       }
+                      className="px-2 py-1 rounded bg-red-500 text-white hover:bg-red-600"
                     >
-                      {d.statut.charAt(0).toUpperCase() + d.statut.slice(1)}
-                    </span>
-                  </td>
-                  <td className="border-t border-gray-300 p-2">
-                    {(d.statut === "en_attente" || d.statut === "accepte") && (
-                      <button
-                        onClick={() =>
-                          desinscrireDemande(d.id, d.creneau.id, d.statut)
-                        }
-                        className="px-2 py-1 rounded bg-red-500 text-white hover:bg-red-600"
-                      >
-                        Se désinscrire
-                      </button>
-                    )}
-                    {d.statut === "refuse" && (
-                      <span className="text-gray-500">Aucune action</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-              {demandes.length === 0 && (
-                <tr>
-                  <td colSpan={4} className="text-center p-4 text-gray-500">
-                    Aucune demande
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                      Se désinscrire
+                    </button>
+                  )}
+                  {d.statut === "refuse" && (
+                    <span className="text-gray-500">Aucune action</span>
+                  )}
+                </td>
+              </tr>
+            ))}
+            {demandes.length === 0 && (
+              <tr>
+                <td colSpan={4} className="text-center p-4 text-gray-500">
+                  Aucune demande
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );

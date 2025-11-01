@@ -91,67 +91,69 @@ function DemandesAdmin() {
   }, []);
 
   return (
-    <div className="p-6 m-6 bg-white rounded shadow">
-      <h2 className="text-xl font-semibold mb-4">Toutes les demandes</h2>
+    <div>
+      <h2 className="text-2xl font-bold mb-4">Mes demandes</h2>
 
-      <table className="w-full border-collapse">
-        <thead>
-          <tr className="bg-gray-200">
-            <th className="border p-2">Date</th>
-            <th className="border p-2">Heure</th>
-            <th className="border p-2">Client</th>
-            <th className="border p-2">Statut</th>
-            <th className="border p-2">Action</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {demandes.map((d) => (
-            <tr key={d.id}>
-              <td className="border p-2">{d.creneau.date}</td>
-              <td className="border p-2">{d.creneau.heure}</td>
-              <td className="border p-2">{d.client.email}</td>
-              <td className="border p-2">
-                <span
-                  className={
-                    d.statut === "accepte"
-                      ? "text-green-600 font-medium"
-                      : d.statut === "refuse"
-                      ? "text-red-600 font-medium"
-                      : "text-orange-600 font-medium"
-                  }
-                >
-                  {d.statut.charAt(0).toUpperCase() + d.statut.slice(1)}
-                </span>
-              </td>
-              <td className="border p-2 space-x-2">
-                <button
-                  onClick={() => acceptDemande(d.id, d.creneau.id)}
-                  disabled={d.statut === "accepte"}
-                  className={`px-2 py-1 rounded ${
-                    d.statut === "accepte"
-                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                      : "bg-green-500 text-white hover:bg-green-600"
-                  }`}
-                >
-                  Accepter
-                </button>
-                <button
-                  onClick={() => refuseDemande(d.id, d.creneau.id, d.statut)}
-                  disabled={d.statut === "refuse"}
-                  className={`px-2 py-1 rounded ${
-                    d.statut === "refuse"
-                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                      : "bg-red-500 text-white hover:bg-red-600"
-                  }`}
-                >
-                  Refuser
-                </button>
-              </td>
+      <div className="rounded-2xl  overflow-hidden bg-white">
+        <table className="w-full table-fixed ">
+          <thead>
+            <tr>
+              <th className="p-4 text-left">Client</th>
+              <th className="p-4 text-left">Date</th>
+              <th className="p-4 text-left">Heure</th>
+              <th className="p-4 text-left">Statut</th>
+              <th className="p-4 text-left">Action</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+
+          <tbody>
+            {demandes.map((d) => (
+              <tr key={d.id}>
+                <td className="border-t border-gray-300 p-4">{d.client.email}</td>
+                <td className="border-t border-gray-300 p-4">{d.creneau.date}</td>
+                <td className="border-t border-gray-300 p-4">{d.creneau.heure}</td>
+                <td className="border-t border-gray-300 p-4">
+                  <span
+                    className={
+                      d.statut === "accepte"
+                        ? "text-green-600 font-medium"
+                        : d.statut === "refuse"
+                        ? "text-red-600 font-medium"
+                        : "text-orange-600 font-medium"
+                    }
+                  >
+                    {d.statut.charAt(0).toUpperCase() + d.statut.slice(1)}
+                  </span>
+                </td>
+                <td className="border-t border-gray-300 p-4">
+                  <button
+                    onClick={() => acceptDemande(d.id, d.creneau.id)}
+                    disabled={d.statut === "accepte"}
+                    className={`px-2 py-1 rounded ${
+                      d.statut === "accepte"
+                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        : "bg-green-500 text-white hover:bg-green-600"
+                    }`}
+                  >
+                    Accepter
+                  </button>
+                  <button
+                    onClick={() => refuseDemande(d.id, d.creneau.id, d.statut)}
+                    disabled={d.statut === "refuse"}
+                    className={`px-2 py-1 rounded ${
+                      d.statut === "refuse"
+                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        : "bg-red-500 text-white hover:bg-red-600"
+                    }`}
+                  >
+                    Refuser
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
