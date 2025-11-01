@@ -38,7 +38,7 @@ function Demandes() {
   }, []);
 
   return (
-    <div className="p-6 m-6 bg-white rounded shadow">
+    <div className="p-4 m-5">
       {role === "admin" && <DemandesAdmin />}
       {role === "client" && <DemandesClient />}
     </div>
