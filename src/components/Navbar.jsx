@@ -37,7 +37,7 @@ function Navbar() {
         to="/dashboard"
         className={({ isActive }) =>
           `rounded-2xl px-3 py-2 hover:bg-primary hover:text-secondary transition ${
-            isActive ? "bg-primary hover:bg-primary-100 text-black" : ""
+            isActive ? "bg-primary hover:bg-primary-hover text-black" : ""
           } flex items-center`
         }
       >
@@ -49,7 +49,7 @@ function Navbar() {
         to="/"
         className={({ isActive }) =>
           `rounded-2xl px-3 py-2 hover:bg-primary hover:text-secondary transition ${
-            isActive ? "bg-primary hover:bg-primary-100 text-black" : ""
+            isActive ? "bg-primary hover:bg-primary-hover text-black" : ""
           } flex items-center`
         }
       >
@@ -62,7 +62,7 @@ function Navbar() {
           to="/demandes"
           className={({ isActive }) =>
             `rounded-2xl px-3 py-2 hover:bg-primary hover:text-secondary transition ${
-              isActive ? "bg-primary hover:bg-primary-100 text-black" : ""
+              isActive ? "bg-primary hover:bg-primary-hover text-black" : ""
             } flex items-center`
           }
         >

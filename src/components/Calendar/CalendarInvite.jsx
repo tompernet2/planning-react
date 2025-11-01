@@ -94,7 +94,6 @@ function CalendarInvite() {
   return (
     <div>
       <h1 className="text-2xl font-bold mb-4">Planning Hebdomadaire</h1>
-
       <div className="rounded-2xl bg-white p-4  ">
         {/* Navigation semaine */}
         <div className="flex items-center justify-between mb-6">
@@ -109,6 +108,7 @@ function CalendarInvite() {
             </span>
             <span>{joursSemaine[3].getFullYear()}</span>
           </div>
+
           {/* Nav */}
           <div className="flex items-center gap-1 rounded-xl overflow-hidden text-cream">
             <button
@@ -139,8 +139,11 @@ function CalendarInvite() {
               <AiOutlineRight className="w-5 h-5" />
             </button>
           </div>
+
           <div className="w-16"></div> {/* Spacer pour équilibrer */}
         </div>
+
+
 
         {/* Grille calendrier */}
         <div className="rounded-2xl border border-gray-300 overflow-hidden">
@@ -196,8 +199,8 @@ function CalendarInvite() {
                             }}
                             className={`rounded-xl h-full w-full flex items-center justify-center text-sm ${
                               isAvailable
-                                ? "bg-green-400 text-white cursor-pointer hover:bg-green-500"
-                                : "bg-red-400 text-white"
+                                ? "bg-green text-green-100 cursor-pointer hover:bg-green-hover"
+                                : "bg-red text-red-100"
                             }`}
                           >
                             {creneau.statut}
@@ -217,22 +220,22 @@ function CalendarInvite() {
         {/* Modal de confirmation */}
         {showConfirm && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
-            <div className="bg-white p-6 rounded shadow-lg">
+            <div className="bg-cream p-8 rounded-2xl">
               <h2 className="text-lg font-bold mb-4">
                 Pour vous inscrire veuillez vous connecté
               </h2>
               <div className="flex justify-end gap-4">
                 <button
                   onClick={() => setShowConfirm(false)}
-                  className="px-4 py-2 bg-gray-300 rounded"
+                  className="px-4 py-2 bg-secondary hover:bg-secondary-100 cursor-pointer text-cream rounded-xl"
                 >
-                  Non
+                  Fermer
                 </button>
                 <button
                   onClick={() => navigate("/login")}
-                  className="px-4 py-2 bg-blue-600 text-white rounded"
+                  className="px-4 py-2 bg-primary hover:bg-primary-hover cursor-pointer text-black rounded-xl"
                 >
-                  Oui
+                  Se connecter
                 </button>
               </div>
             </div>

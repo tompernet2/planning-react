@@ -1,52 +1,37 @@
 @import "tailwindcss";
 
 @font-face {
-    font-family: Sora;
-    src: url("/fonts/Sora-Regular.ttf");
+  font-family: Sora;
+  src: url("/fonts/Sora-Regular.ttf");
 }
 @font-face {
-    font-family: Silka;
-    src: url("/src/assets/fonts/Silka-Medium.ttf");
+  font-family: Silka;
+  src: url("/src/assets/fonts/Silka-Medium.ttf");
 }
 
-
-@theme{
-    --font-primary: Silka, sans-serif;
-    --font-secondary: Sora, sans-serif;
+@theme {
+  --font-primary: Silka, sans-serif;
+  --font-secondary: Sora, sans-serif;
 }
 
 body {
   font-family: var(--font-primary);
-  background-color: #F3F3ED;
+  background-color: #f3f3ed;
 }
-
-
 
 @theme {
-  --color-primary: #B3EBF2; 
-  --color-primary-100: #D6F4F8; 
-  --color-secondary: #2A2E32; 
-  --color-secondary-100: #4F575E; 
-  --color-cream: #F3F3ED; 
-
-
-}
-
-:root {
-  /* ROUGE */
-  --color-red: #F8B8B8;           /* fond pastel rouge */
-  --color-red-100: #D95353;       /* texte / bordure plus foncé */
-
-  /* VERT */
-  --color-green: #B8F2B8;         /* fond pastel vert */
-  --color-green-hover: #D6FFD6;   /* hover plus clair */
-  --color-green-100: #2E8B2E;     /* texte / bordure plus foncé */
-
-  /* JAUNE */
-  --color-yellow: #FFF4B8;        /* fond pastel jaune */
-  --color-yellow-100: #D4C354;    /* texte / bordure plus foncé */
-
-  /* BLEU */
-  --color-blue: #B8E0F8;          /* fond pastel bleu */
-  --color-blue-100: #2E6FD4;      /* texte / bordure plus foncé */
+  --color-primary: #b8e0f8;
+  --color-primary-hover: #9dd3f7;
+  --color-secondary: #2a2e32;
+  --color-secondary-100: #4f575e;
+  --color-cream: #f3f3ed;
+  --color-red: #f8b8b8; 
+  --color-red-100: #d95353;
+  --color-green: #b8f2b8; 
+  --color-green-hover: #9ee89e; 
+  --color-green-100: #2e8b2e;
+  --color-yellow: #fff4b8; 
+  --color-yellow-100: #d4c354; 
+  --color-purple: #dcc6f8;
+  --color-purple-100: #7a4acb;
 }

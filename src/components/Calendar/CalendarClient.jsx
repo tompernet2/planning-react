@@ -1,6 +1,6 @@
 // src/components/CalendarClient.jsx
 import React, { useEffect, useState } from "react";
-import { CgArrowLeftR, CgArrowRightR } from "react-icons/cg";
+import { AiOutlineLeft, AiOutlineRight } from "react-icons/ai";
 import supabase from "../../helper/supabaseClient";
 
 function CalendarClient() {
@@ -10,6 +10,7 @@ function CalendarClient() {
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [mesAcceptedCreneauIds, setMesAcceptedCreneauIds] = useState([]);
   const [mesPendingCreneauIds, setMesPendingCreneauIds] = useState([]);
+  const [mesRefusedCreneauIds, setMesRefusedCreneauIds] = useState([]);
 
   const heures = [
     "09:00",
@@ -178,6 +179,15 @@ function CalendarClient() {
           .eq("statut", "en_attente");
 
         setMesPendingCreneauIds((pendingData || []).map((d) => d.creneau_id));
+
+        const { data: refusedData } = await supabase
+          .from("demandes")
+          .select("creneau_id")
+          .in("creneau_id", creneauIds)
+          .eq("client_id", session.user.id)
+          .eq("statut", "refuse");
+
+        setMesRefusedCreneauIds((refusedData || []).map((d) => d.creneau_id));
       } catch (err) {
         console.error("Erreur dans le chargement du planning :", err);
         setCreneaux([]);
@@ -193,122 +203,181 @@ function CalendarClient() {
 
   return (
     <div>
-      <h1>Planning Client</h1>
+      <h1 className="text-2xl font-bold mb-4">Planning Hebdomadaire</h1>
 
-      <div className="flex items-center justify-between mb-6">
-        <button
-          onClick={semainePrecedente}
-          className="flex items-center p-2 bg-gray-200 rounded hover:bg-gray-300"
-        >
-          <CgArrowLeftR className="w-5 h-5 mr-2" />
-          Précédent
-        </button>
+      <div className="rounded-2xl bg-white p-4  ">
+        {/* Navigation semaine */}
+        <div className="flex items-center justify-between mb-6">
+          {/* Mois et Année */}
+          <div className="text-2xl font-bold text-secondary flex items-center gap-2">
+            <span>
+              {joursSemaine[3]
+                .toLocaleDateString("fr-FR", {
+                  month: "long",
+                })
+                .replace(/^\w/, (c) => c.toUpperCase())}
+            </span>
+            <span>{joursSemaine[3].getFullYear()}</span>
+          </div>
+          {/* Nav */}
+          <div className="flex items-center gap-1 rounded-xl overflow-hidden text-cream">
+            <button
+              onClick={semainePrecedente}
+              className="flex items-center p-3 bg-secondary cursor-pointer rounded hover:bg-secondary-100"
+            >
+              <AiOutlineLeft className="w-5 h-5" />
+            </button>
 
-        <h2 className="text-xl font-bold">
-          Semaine du {joursSemaine[0].toLocaleDateString("fr-FR")}
-        </h2>
-
-        <button
-          onClick={semaineSuivante}
-          className="flex items-center p-2 bg-gray-200 rounded hover:bg-gray-300"
-        >
-          Suivant
-          <CgArrowRightR className="w-5 h-5 ml-2" />
-        </button>
-      </div>
-
-      <div className="overflow-x-auto">
-        <table className="w-full border">
-          <thead>
-            <tr>
-              <th className="border p-2 bg-gray-100">Heure</th>
-              {joursSemaine.map((date, i) => (
-                <th key={i} className="border p-2 bg-gray-100 w-1/7">
-                  {date.toLocaleDateString("fr-FR", {
-                    weekday: "long",
-                    day: "numeric",
-                    month: "short",
-                  })}
-                </th>
-              ))}
-            </tr>
-          </thead>
-
-          <tbody>
-            {heures.map((heure) => (
-              <tr key={heure}>
-                <td className="border p-2 font-medium text-center bg-gray-50">
-                  {heure}
-                </td>
-
-                {joursSemaine.map((date, i) => {
-                  const creneau = findCreneau(date, heure);
-
-                  let bgColor = "cursor-default";
-                  let text = "";
-
-                  if (creneau) {
-                    if (mesAcceptedCreneauIds.includes(creneau.id)) {
-                      bgColor = "bg-blue-500 text-white cursor-default";
-                      text = "réservé";
-                    } else if (mesPendingCreneauIds.includes(creneau.id)) {
-                      bgColor = "bg-yellow-400 text-black cursor-default";
-                      text = "inscrit";
-                    } else if (creneau.statut === "disponible") {
-                      bgColor = "bg-green-400 cursor-pointer";
-                      text = "disponible";
-                    } else {
-                      bgColor = "bg-red-500 text-white cursor-default";
-                      text = "occupé";
-                    }
-                  }
-
-                  const canClick =
-                    creneau?.statut === "disponible" &&
-                    !mesAcceptedCreneauIds.includes(creneau.id) &&
-                    !mesPendingCreneauIds.includes(creneau.id);
-
-                  return (
-                    <td
-                      key={i}
-                      onClick={() =>
-                        canClick && handleSlotClick(date, heure)
-                      }
-                      className={`border p-4 text-center ${bgColor}`}
-                    >
-                      {text}
-                    </td>
-                  );
+            <div className="h-full bg-secondary px-2">
+              <h2 className="text-xl p-2">
+                {joursSemaine[0].toLocaleDateString("fr-FR", {
+                  month: "short",
+                  day: "numeric",
+                })}{" "}
+                -{" "}
+                {joursSemaine[6].toLocaleDateString("fr-FR", {
+                  month: "short",
+                  day: "numeric",
                 })}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+              </h2>
+            </div>
 
-      {showConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded shadow-lg">
-            <h2 className="text-lg font-bold mb-4">
-              Voulez vous vous inscrire ?
-            </h2>
-            <div className="flex justify-end gap-4">
-              <button
-                onClick={() => setShowConfirm(false)}
-                className="px-4 py-2 bg-gray-300 rounded"
-              >
-                Non
-              </button>
-              <button
-                onClick={handleConfirm}
-                className="px-4 py-2 bg-blue-600 text-white rounded"
-              >
-                Oui
-              </button>
+            <button
+              onClick={semaineSuivante}
+              className="flex items-center p-3 bg-secondary cursor-pointer rounded hover:bg-secondary-100"
+            >
+              <AiOutlineRight className="w-5 h-5" />
+            </button>
+          </div>
+          <div className="w-16"></div> {/* Spacer pour équilibrer */}
+        </div>
+
+        {/* Grille calendrier */}
+        <div className="rounded-2xl border border-gray-300 overflow-hidden">
+          <table className="w-full table-fixed">
+            <thead>
+              <tr>
+                <th className="border-r border-b border-gray-300 p-2 w-20">
+                  Heure
+                </th>
+                {joursSemaine.map((date, i) => (
+                  <th
+                    key={i}
+                    className={`border-b border-gray-300 p-2 ${
+                      i < 6 ? "border-r" : ""
+                    }`}
+                  >
+                    {date.toLocaleDateString("fr-FR", {
+                      weekday: "short",
+                      day: "numeric",
+                    })}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+
+            <tbody>
+              {heures.map((heure, index) => (
+                <tr key={heure}>
+                  <td
+                    className={`border-r border-gray-300 text-gray-500 p-4 font-medium align-top h-24 ${
+                      index < heures.length - 1 ? "border-b" : ""
+                    }`}
+                  >
+                    {heure}
+                  </td>
+
+                  {joursSemaine.map((date, i) => {
+                    const creneau = findCreneau(date, heure);
+
+                    let bgColor = "";
+                    let textColor = "";
+                    let text = "";
+                    let isClickable = false;
+
+                    if (creneau) {
+                      if (mesAcceptedCreneauIds.includes(creneau.id)) {
+                        bgColor = "bg-purple";
+                        textColor = "text-pruple-100";
+                        text = "réservé";
+                      } else if (mesPendingCreneauIds.includes(creneau.id)) {
+                        bgColor = "bg-yellow";
+                        textColor = "text-yellow-100";
+                        text = "inscrit";
+                      } else if (mesRefusedCreneauIds.includes(creneau.id)) {
+                        bgColor = "bg-gray-300";
+                        textColor = "text-gray-500";
+                        text = "refusé";
+                        isClickable = false;
+                      } else if (creneau.statut === "disponible") {
+                        bgColor = "bg-green";
+                        textColor = "text-green-100";
+                        text = "disponible";
+                        isClickable = true;
+                      } else {
+                        bgColor = "bg-red";
+                        textColor = "text-red-100";
+                        text = "occupé";
+                      }
+                    }
+
+                    return (
+                      <td
+                        key={i}
+                        className={`p-0.5 h-24 ${i < 6 ? "border-r" : ""} ${
+                          index < heures.length - 1 ? "border-b" : ""
+                        } border-gray-300`}
+                      >
+                        {creneau ? (
+                          <div
+                            onClick={() =>
+                              isClickable && handleSlotClick(date, heure)
+                            }
+                            className={`rounded-xl h-full w-full flex items-center justify-center text-sm ${bgColor} ${textColor} ${
+                              isClickable
+                                ? "cursor-pointer hover:opacity-80"
+                                : "cursor-default"
+                            }`}
+                          >
+                            {text}
+                          </div>
+                        ) : (
+                          <div className="h-full w-full"></div>
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Modal de confirmation */}
+        {showConfirm && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
+            <div className="bg-cream p-8 rounded-2xl">
+              <h2 className="text-lg font-bold mb-4">
+                Voulez vous vous inscrire ?
+              </h2>
+              <div className="flex justify-end gap-4">
+                <button
+                  onClick={() => setShowConfirm(false)}
+                  className="px-4 py-2 bg-secondary hover:bg-secondary-100 cursor-pointer text-cream rounded-xl"
+                >
+                  Non
+                </button>
+                <button
+                  onClick={handleConfirm}
+                  className="px-4 py-2 bg-primary hover:bg-primary-hover cursor-pointer text-black rounded-xl"
+                >
+                  Oui
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

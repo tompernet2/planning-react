@@ -62,7 +62,7 @@ function Dashboard() {
 
         <button
           onClick={handleSignOut}
-          className="mt-4 bg-secondary text-white px-4 py-2 rounded-2xl hover:bg-secondary-100"
+          className="mt-4 bg-secondary text-white px-4 py-2 rounded-xl hover:bg-secondary-100"
         >
           Déconnexion
         </button>
