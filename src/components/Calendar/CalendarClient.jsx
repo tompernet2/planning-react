@@ -7,7 +7,9 @@ function CalendarClient() {
   const [creneaux, setCreneaux] = useState([]);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showUnsubscribe, setShowUnsubscribe] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState(null);
+  const [selectedDemande, setSelectedDemande] = useState(null);
   const [mesAcceptedDemandes, setMesAcceptedDemandes] = useState([]);
   const [mesPendingDemandes, setMesPendingDemandes] = useState([]);
   const [mesRefusedCreneauIds, setMesRefusedCreneauIds] = useState([]);
@@ -128,6 +130,21 @@ function CalendarClient() {
     } else {
       console.error("Créneau non trouvé !");
     }
+  };
+
+  const handleUnsubscribeClick = (demande) => {
+    setSelectedDemande(demande);
+    setShowUnsubscribe(true);
+  };
+
+  const handleUnsubscribeConfirm = async () => {
+    await desinscrireCreneau(
+      selectedDemande.id,
+      selectedDemande.creneau_id,
+      selectedDemande.statut
+    );
+    setShowUnsubscribe(false);
+    setSelectedDemande(null);
   };
 
   const desinscrireCreneau = async (demandeId, creneauId, statutActuel) => {
@@ -374,11 +391,7 @@ function CalendarClient() {
                             {demande && (
                               <button
                                 onClick={() => {
-                                  desinscrireCreneau(
-                                    demande.id,
-                                    demande.creneau_id,
-                                    demande.statut
-                                  );
+                                  handleUnsubscribeClick(demande);
                                 }}
                                 className={`hidden group-hover:flex absolute top-0 right-0 border ${bgColor} hover:opacity-80 m-1 p-0.5 rounded-lg cursor-pointer`}
                               >
@@ -399,9 +412,9 @@ function CalendarClient() {
           </table>
         </div>
 
-        {/* Modal de confirmation */}
+        {/* Modal de confirmation inscription */}
         {showConfirm && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-cream p-8 rounded-2xl">
               <h2 className="text-lg font-bold mb-4">
                 Voulez vous vous inscrire ?
@@ -416,6 +429,34 @@ function CalendarClient() {
                 <button
                   onClick={handleConfirm}
                   className="px-4 py-2 bg-primary hover:bg-primary-hover cursor-pointer text-black rounded-xl"
+                >
+                  Oui
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal de confirmation désinscription */}
+        {showUnsubscribe && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-cream p-8 rounded-2xl">
+              <h2 className="text-lg font-bold mb-4">
+                Voulez-vous vous désinscrire ?
+              </h2>
+              <div className="flex justify-end gap-4">
+                <button
+                  onClick={() => {
+                    setShowUnsubscribe(false);
+                    setSelectedDemande(null);
+                  }}
+                  className="px-4 py-2 bg-secondary hover:bg-secondary-100 cursor-pointer text-cream rounded-xl"
+                >
+                  Non
+                </button>
+                <button
+                  onClick={handleUnsubscribeConfirm}
+                  className="px-4 py-2 bg-primary hover:bg-primary-100 cursor-pointer text-black rounded-xl"
                 >
                   Oui
                 </button>
