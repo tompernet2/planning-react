@@ -11,6 +11,8 @@ function CalendarAdmin() {
   const [selectedCreneau, setSelectedCreneau] = useState(null);
   const [currentDate, setCurrentDate] = useState(new Date());
 
+  const today = new Date();
+
   const heures = [
     "09:00",
     "10:00",
@@ -221,6 +223,10 @@ function CalendarAdmin() {
                     key={i}
                     className={`border-b border-gray-300 p-2 ${
                       i < 6 ? "border-r" : ""
+                    } ${
+                      formatDate(date) === formatDate(today)
+                        ? "text-primary-hover"
+                        : ""
                     }`}
                   >
                     {date.toLocaleDateString("fr-FR", {
@@ -273,7 +279,11 @@ function CalendarAdmin() {
                                 <IoClose className="w-5 h-5" />
                               </button>
                             )}
-                            <span>{creneau.statut}</span>
+                            <span className="font-semibold">
+                              {creneau.statut === "disponible"
+                                ? "Disponible"
+                                : "Occupé"}
+                            </span>
                             <span
                               className={
                                 isAvailable ? "text-green-200" : "text-red-200"

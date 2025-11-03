@@ -14,6 +14,8 @@ function CalendarClient() {
   const [mesPendingDemandes, setMesPendingDemandes] = useState([]);
   const [mesRefusedCreneauIds, setMesRefusedCreneauIds] = useState([]);
 
+  const today = new Date();
+
   const heures = [
     "09:00",
     "10:00",
@@ -305,6 +307,10 @@ function CalendarClient() {
                     key={i}
                     className={`border-b border-gray-300 p-2 ${
                       i < 6 ? "border-r" : ""
+                    } ${
+                      formatDate(date) === formatDate(today)
+                        ? "text-primary-hover"
+                        : ""
                     }`}
                   >
                     {date.toLocaleDateString("fr-FR", {
@@ -348,30 +354,30 @@ function CalendarClient() {
                       if (acceptedDemande) {
                         bgColor = "bg-purple";
                         textColor = "text-purple-100";
-                        text = "réservé";
+                        text = "Réservé";
                         demande = acceptedDemande;
                         mid = "text-purple-200";
                       } else if (pendingDemande) {
                         bgColor = "bg-yellow";
                         textColor = "text-yellow-100";
-                        text = "inscrit";
+                        text = "Inscrit";
                         demande = pendingDemande;
                         mid = "text-yellow-200";
                       } else if (mesRefusedCreneauIds.includes(creneau.id)) {
                         bgColor = "bg-gray-300";
                         textColor = "text-gray-700";
-                        text = "refusé";
+                        text = "Refusé";
                         mid = "text-gray-500";
                       } else if (creneau.statut === "disponible") {
                         bgColor = "bg-green";
                         textColor = "text-green-100";
-                        text = "disponible";
+                        text = "Disponible";
                         isClickable = true;
                         mid = "text-green-200";
                       } else {
                         bgColor = "bg-red";
                         textColor = "text-red-100";
-                        text = "occupé";
+                        text = "Occupé";
                         mid = "text-red-200";
                       }
                     }
@@ -404,7 +410,7 @@ function CalendarClient() {
                                 <IoClose className="w-5 h-5" />
                               </button>
                             )}
-                            <span>{text}</span>
+                            <span className="font-semibold">{text}</span>
 
                             <span className={`${mid}`}>
                               {heure} -{" "}

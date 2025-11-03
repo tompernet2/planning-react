@@ -108,7 +108,6 @@ function CalendarInvite() {
             </span>
             <span>{joursSemaine[3].getFullYear()}</span>
           </div>
-
           {/* Nav */}
           <div className="flex items-center gap-1 rounded-xl overflow-hidden text-cream">
             <button
@@ -139,11 +138,8 @@ function CalendarInvite() {
               <AiOutlineRight className="w-5 h-5" />
             </button>
           </div>
-
           <div className="w-16"></div> {/* Spacer pour équilibrer */}
         </div>
-
-
 
         {/* Grille calendrier */}
         <div className="rounded-2xl border border-gray-300 overflow-hidden">
@@ -197,13 +193,30 @@ function CalendarInvite() {
                             onClick={() => {
                               if (isAvailable) setShowConfirm(true);
                             }}
-                            className={`rounded-xl h-full w-full flex items-center justify-center text-sm ${
+                            className={`rounded-xl h-full w-full flex p-2 flex-col text-sm ${
                               isAvailable
                                 ? "bg-green text-green-100 cursor-pointer hover:bg-green-hover"
                                 : "bg-red text-red-100 cursor-default"
                             }`}
                           >
-                            {creneau.statut}
+                            <span className="font-semibold">
+                              {creneau.statut === "disponible"
+                                ? "Disponible"
+                                : "Occupé"}
+                            </span>
+                            <span
+                              className={
+                                isAvailable ? "text-green-200" : "text-red-200"
+                              }
+                            >
+                              {" "}
+                              {heure} -{" "}
+                              {String(
+                                parseInt(heure.split(":")[0]) + 1
+                              ).padStart(2, "0") +
+                                ":" +
+                                heure.split(":")[1]}
+                            </span>
                           </div>
                         ) : (
                           <div className="h-full w-full"></div>
