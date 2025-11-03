@@ -1,4 +1,3 @@
-// src/components/DemandesClient.jsx
 import React, { useEffect, useState } from "react";
 import supabase from "../../helper/supabaseClient";
 

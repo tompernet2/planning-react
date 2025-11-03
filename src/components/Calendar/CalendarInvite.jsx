@@ -200,7 +200,7 @@ function CalendarInvite() {
                             className={`rounded-xl h-full w-full flex items-center justify-center text-sm ${
                               isAvailable
                                 ? "bg-green text-green-100 cursor-pointer hover:bg-green-hover"
-                                : "bg-red text-red-100"
+                                : "bg-red text-red-100 cursor-default"
                             }`}
                           >
                             {creneau.statut}

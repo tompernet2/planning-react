@@ -1,4 +1,3 @@
-// src/pages/Dashboard.tsx
 import React, { useEffect, useState } from "react";
 import supabase from "../helper/supabaseClient";
 import { useNavigate } from "react-router-dom";

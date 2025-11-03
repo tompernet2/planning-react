@@ -1,6 +1,6 @@
-// src/components/CalendarClient.jsx
 import React, { useEffect, useState } from "react";
 import { AiOutlineLeft, AiOutlineRight } from "react-icons/ai";
+import { IoClose } from "react-icons/io5";
 import supabase from "../../helper/supabaseClient";
 
 function CalendarClient() {
@@ -8,8 +8,8 @@ function CalendarClient() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showConfirm, setShowConfirm] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState(null);
-  const [mesAcceptedCreneauIds, setMesAcceptedCreneauIds] = useState([]);
-  const [mesPendingCreneauIds, setMesPendingCreneauIds] = useState([]);
+  const [mesAcceptedDemandes, setMesAcceptedDemandes] = useState([]);
+  const [mesPendingDemandes, setMesPendingDemandes] = useState([]);
   const [mesRefusedCreneauIds, setMesRefusedCreneauIds] = useState([]);
 
   const heures = [
@@ -130,6 +130,29 @@ function CalendarClient() {
     }
   };
 
+  const desinscrireCreneau = async (demandeId, creneauId, statutActuel) => {
+    const { error } = await supabase
+      .from("demandes")
+      .delete()
+      .eq("id", demandeId);
+
+    if (error) {
+      console.error("Erreur désinscription :", error);
+      return;
+    }
+
+    if (statutActuel === "accepte") {
+      const { error: errCreneau } = await supabase
+        .from("creneaux")
+        .update({ statut: "disponible" })
+        .eq("id", creneauId);
+
+      if (errCreneau) console.error("Erreur libération créneau :", errCreneau);
+    }
+
+    setCurrentDate(new Date(currentDate));
+  };
+
   useEffect(() => {
     const fetchCreneauxEtDemandes = async () => {
       try {
@@ -157,28 +180,29 @@ function CalendarClient() {
 
         const creneauIds = (creneauxData || []).map((c) => c.id);
         if (creneauIds.length === 0) {
-          setMesAcceptedCreneauIds([]);
-          setMesPendingCreneauIds([]);
+          setMesAcceptedDemandes([]);
+          setMesPendingDemandes([]);
+          setMesRefusedCreneauIds([]);
           return;
         }
 
         const { data: acceptedData } = await supabase
           .from("demandes")
-          .select("creneau_id")
+          .select("id, creneau_id, statut")
           .in("creneau_id", creneauIds)
           .eq("client_id", session.user.id)
           .eq("statut", "accepte");
 
-        setMesAcceptedCreneauIds((acceptedData || []).map((d) => d.creneau_id));
+        setMesAcceptedDemandes(acceptedData || []);
 
         const { data: pendingData } = await supabase
           .from("demandes")
-          .select("creneau_id")
+          .select("id, creneau_id, statut")
           .in("creneau_id", creneauIds)
           .eq("client_id", session.user.id)
           .eq("statut", "en_attente");
 
-        setMesPendingCreneauIds((pendingData || []).map((d) => d.creneau_id));
+        setMesPendingDemandes(pendingData || []);
 
         const { data: refusedData } = await supabase
           .from("demandes")
@@ -191,8 +215,9 @@ function CalendarClient() {
       } catch (err) {
         console.error("Erreur dans le chargement du planning :", err);
         setCreneaux([]);
-        setMesAcceptedCreneauIds([]);
-        setMesPendingCreneauIds([]);
+        setMesAcceptedDemandes([]);
+        setMesPendingDemandes([]);
+        setMesRefusedCreneauIds([]);
       }
     };
 
@@ -208,7 +233,6 @@ function CalendarClient() {
       <div className="rounded-2xl bg-white p-4  ">
         {/* Navigation semaine */}
         <div className="flex items-center justify-between mb-6">
-          {/* Mois et Année */}
           <div className="text-2xl font-bold text-secondary flex items-center gap-2">
             <span>
               {joursSemaine[3]
@@ -219,7 +243,6 @@ function CalendarClient() {
             </span>
             <span>{joursSemaine[3].getFullYear()}</span>
           </div>
-          {/* Nav */}
           <div className="flex items-center gap-1 rounded-xl overflow-hidden text-cream">
             <button
               onClick={semainePrecedente}
@@ -249,7 +272,7 @@ function CalendarClient() {
               <AiOutlineRight className="w-5 h-5" />
             </button>
           </div>
-          <div className="w-16"></div> {/* Spacer pour équilibrer */}
+          <div className="w-16"></div>
         </div>
 
         {/* Grille calendrier */}
@@ -294,21 +317,30 @@ function CalendarClient() {
                     let textColor = "";
                     let text = "";
                     let isClickable = false;
+                    let demande = null;
 
                     if (creneau) {
-                      if (mesAcceptedCreneauIds.includes(creneau.id)) {
+                      const acceptedDemande = mesAcceptedDemandes.find(
+                        (d) => d.creneau_id === creneau.id
+                      );
+                      const pendingDemande = mesPendingDemandes.find(
+                        (d) => d.creneau_id === creneau.id
+                      );
+
+                      if (acceptedDemande) {
                         bgColor = "bg-purple";
                         textColor = "text-pruple-100";
                         text = "réservé";
-                      } else if (mesPendingCreneauIds.includes(creneau.id)) {
+                        demande = acceptedDemande;
+                      } else if (pendingDemande) {
                         bgColor = "bg-yellow";
                         textColor = "text-yellow-100";
                         text = "inscrit";
+                        demande = pendingDemande;
                       } else if (mesRefusedCreneauIds.includes(creneau.id)) {
                         bgColor = "bg-gray-300";
                         textColor = "text-gray-500";
                         text = "refusé";
-                        isClickable = false;
                       } else if (creneau.statut === "disponible") {
                         bgColor = "bg-green";
                         textColor = "text-green-100";
@@ -333,12 +365,26 @@ function CalendarClient() {
                             onClick={() =>
                               isClickable && handleSlotClick(date, heure)
                             }
-                            className={`rounded-xl h-full w-full flex items-center justify-center text-sm ${bgColor} ${textColor} ${
+                            className={`group relative rounded-xl h-full w-full flex items-center justify-center text-sm ${bgColor} ${textColor} ${
                               isClickable
                                 ? "cursor-pointer hover:opacity-80"
                                 : "cursor-default"
                             }`}
                           >
+                            {demande && (
+                              <button
+                                onClick={() => {
+                                  desinscrireCreneau(
+                                    demande.id,
+                                    demande.creneau_id,
+                                    demande.statut
+                                  );
+                                }}
+                                className={`hidden group-hover:flex absolute top-0 right-0 border ${bgColor} hover:opacity-80 m-1 p-0.5 rounded-lg cursor-pointer`}
+                              >
+                                <IoClose className="w-5 h-5" />
+                              </button>
+                            )}
                             {text}
                           </div>
                         ) : (
