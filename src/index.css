@@ -15,7 +15,7 @@
 }
 
 body {
-  font-family: var(--font-primary);
+  font-family: var(--font-secondary);
   background-color: #f3f3ed;
 }
 
@@ -27,11 +27,15 @@ body {
   --color-cream: #f3f3ed;
   --color-red: #f8b8b8; 
   --color-red-100: #991B1B;
+  --color-red-200: #DC2929;
   --color-green: #b8f2b8; 
   --color-green-hover: #9ee89e; 
   --color-green-100: #166534;
+  --color-green-200: #24A955;
   --color-yellow: #fff4b8; 
   --color-yellow-100: #92400E; 
+  --color-yellow-200: #E1912E; 
   --color-purple: #dcc6f8;
-  --color-purple-100: #7a4acb;
+  --color-purple-100: #6B21A8;
+  --color-purple-200: #973AEB;
 }

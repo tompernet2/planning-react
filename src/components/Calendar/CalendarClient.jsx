@@ -333,6 +333,7 @@ function CalendarClient() {
                     let bgColor = "";
                     let textColor = "";
                     let text = "";
+                    let mid = "";
                     let isClickable = false;
                     let demande = null;
 
@@ -346,27 +347,32 @@ function CalendarClient() {
 
                       if (acceptedDemande) {
                         bgColor = "bg-purple";
-                        textColor = "text-pruple-100";
+                        textColor = "text-purple-100";
                         text = "réservé";
                         demande = acceptedDemande;
+                        mid = "text-purple-200";
                       } else if (pendingDemande) {
                         bgColor = "bg-yellow";
                         textColor = "text-yellow-100";
                         text = "inscrit";
                         demande = pendingDemande;
+                        mid = "text-yellow-200";
                       } else if (mesRefusedCreneauIds.includes(creneau.id)) {
                         bgColor = "bg-gray-300";
-                        textColor = "text-gray-500";
+                        textColor = "text-gray-700";
                         text = "refusé";
+                        mid = "text-gray-500";
                       } else if (creneau.statut === "disponible") {
                         bgColor = "bg-green";
                         textColor = "text-green-100";
                         text = "disponible";
                         isClickable = true;
+                        mid = "text-green-200";
                       } else {
                         bgColor = "bg-red";
                         textColor = "text-red-100";
                         text = "occupé";
+                        mid = "text-red-200";
                       }
                     }
 
@@ -382,7 +388,7 @@ function CalendarClient() {
                             onClick={() =>
                               isClickable && handleSlotClick(date, heure)
                             }
-                            className={`group relative rounded-xl h-full w-full flex items-center justify-center text-sm ${bgColor} ${textColor} ${
+                            className={`group relative rounded-xl h-full w-full flex p-2 flex-col text-sm ${bgColor} ${textColor} ${
                               isClickable
                                 ? "cursor-pointer hover:opacity-80"
                                 : "cursor-default"
@@ -398,7 +404,16 @@ function CalendarClient() {
                                 <IoClose className="w-5 h-5" />
                               </button>
                             )}
-                            {text}
+                            <span>{text}</span>
+
+                            <span className={`${mid}`}>
+                              {heure} -{" "}
+                              {String(
+                                parseInt(heure.split(":")[0]) + 1
+                              ).padStart(2, "0") +
+                                ":" +
+                                heure.split(":")[1]}
+                            </span>
                           </div>
                         ) : (
                           <div className="h-full w-full"></div>

@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { AiOutlineLeft, AiOutlineRight } from "react-icons/ai";
+import { IoClose } from "react-icons/io5";
 import supabase from "../../helper/supabaseClient";
 
 function CalendarAdmin() {
   const [creneaux, setCreneaux] = useState([]);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showDelete, setShowDelete] = useState(false);
+  const [selectedCreneau, setSelectedCreneau] = useState(null);
   const [currentDate, setCurrentDate] = useState(new Date());
 
   const heures = [
@@ -42,6 +45,14 @@ function CalendarAdmin() {
     return jours;
   };
 
+  // Fonction utilitaire pour formater les dates (comme dans CalendarClient)
+  const formatDate = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
   // Navigation
   const semainePrecedente = () => {
     const newDate = new Date(currentDate);
@@ -55,6 +66,15 @@ function CalendarAdmin() {
     setCurrentDate(newDate);
   };
 
+  // Fonction pour trouver un créneau (logique harmonisée)
+  const findCreneau = (date, heure) => {
+    const dateFormatee = formatDate(date);
+    return creneaux.find((c) => {
+      const heureDB = c.heure.substring(0, 5);
+      return c.date === dateFormatee && heureDB === heure;
+    });
+  };
+
   // Gestion des clics et création
   const handleClickCase = (date, heure) => {
     const creneau = findCreneau(date, heure);
@@ -65,13 +85,10 @@ function CalendarAdmin() {
   };
 
   const createCreneau = async (date, heure) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const dateFormatee = `${year}-${month}-${day}`;
+    const dateFormatee = formatDate(date);
     const heureFormatee = heure + ":00";
 
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from("creneaux")
       .insert([
         { date: dateFormatee, heure: heureFormatee, statut: "disponible" },
@@ -81,28 +98,58 @@ function CalendarAdmin() {
     if (error) {
       console.error("Erreur création créneau :", error);
     } else {
-      setCreneaux([...creneaux, data[0]]);
       setShowConfirm(false);
+      setCurrentDate(new Date(currentDate));
     }
   };
 
-  // Chargement des créneaux de la semaine
+  const handleConfirm = async () => {
+    await createCreneau(selectedSlot.date, selectedSlot.heure);
+  };
+
+  const handleDeleteClick = (creneau) => {
+    setSelectedCreneau(creneau);
+    setShowDelete(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    const { error } = await supabase
+      .from("creneaux")
+      .delete()
+      .eq("id", selectedCreneau.id);
+
+    if (error) {
+      console.error("Erreur suppression créneau :", error);
+    } else {
+      setShowDelete(false);
+      setSelectedCreneau(null);
+      setCurrentDate(new Date(currentDate));
+    }
+  };
+
+  // Chargement des créneaux de la semaine (logique harmonisée avec try-catch)
   useEffect(() => {
     const fetchCreneaux = async () => {
-      const debut = getDebutSemaine(currentDate);
-      const fin = new Date(debut);
-      fin.setDate(debut.getDate() + 6);
+      try {
+        const debut = getDebutSemaine(currentDate);
+        const fin = new Date(debut);
+        fin.setDate(debut.getDate() + 6);
 
-      const { data, error } = await supabase
-        .from("creneaux")
-        .select("*")
-        .gte("date", debut.toISOString().split("T")[0])
-        .lte("date", fin.toISOString().split("T")[0]);
+        const debutStr = debut.toISOString().split("T")[0];
+        const finStr = fin.toISOString().split("T")[0];
 
-      if (error) {
-        console.error("Erreur chargement créneaux :", error);
-      } else {
+        const { data, error } = await supabase
+          .from("creneaux")
+          .select("*")
+          .gte("date", debutStr)
+          .lte("date", finStr);
+
+        if (error) throw error;
+
         setCreneaux(data || []);
+      } catch (err) {
+        console.error("Erreur dans le chargement du planning :", err);
+        setCreneaux([]);
       }
     };
 
@@ -110,17 +157,6 @@ function CalendarAdmin() {
   }, [currentDate]);
 
   const joursSemaine = getJoursSemaine();
-
-  const findCreneau = (date, heure) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const dateFormatee = `${year}-${month}-${day}`;
-    return creneaux.find((c) => {
-      const heureDB = c.heure.substring(0, 5);
-      return c.date === dateFormatee && heureDB === heure;
-    });
-  };
 
   return (
     <div>
@@ -221,13 +257,36 @@ function CalendarAdmin() {
                       >
                         {creneau ? (
                           <div
-                            className={`rounded-xl h-full w-full flex items-center justify-center text-sm ${
+                            className={`group relative rounded-xl h-full w-full flex p-2 flex-col text-sm ${
                               isAvailable
                                 ? "bg-green text-green-100 cursor-default"
                                 : "bg-red text-red-100 cursor-default"
                             }`}
                           >
-                            {creneau.statut}
+                            {isAvailable && (
+                              <button
+                                onClick={() => {
+                                  handleDeleteClick(creneau);
+                                }}
+                                className="hidden group-hover:flex absolute top-0 right-0 border bg-green hover:opacity-80 m-1 p-0.5 rounded-lg cursor-pointer"
+                              >
+                                <IoClose className="w-5 h-5" />
+                              </button>
+                            )}
+                            <span>{creneau.statut}</span>
+                            <span
+                              className={
+                                isAvailable ? "text-green-200" : "text-red-200"
+                              }
+                            >
+                              {" "}
+                              {heure} -{" "}
+                              {String(
+                                parseInt(heure.split(":")[0]) + 1
+                              ).padStart(2, "0") +
+                                ":" +
+                                heure.split(":")[1]}
+                            </span>
                           </div>
                         ) : (
                           <div
@@ -244,16 +303,20 @@ function CalendarAdmin() {
           </table>
         </div>
 
-        {/* Modal de confirmation */}
+        {/* Modal de confirmation création */}
         {showConfirm && selectedSlot && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-cream p-8 rounded-2xl">
               <h2 className="text-lg font-bold mb-4">
                 Créer un créneau le{" "}
                 <span>
-                  {selectedSlot.date.toLocaleDateString("fr-FR")}
+                  {selectedSlot.date.toLocaleDateString("fr-FR", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  })}
                 </span>{" "}
-                à <span >{selectedSlot.heure}</span> ?
+                à <span>{selectedSlot.heure}</span> ?
               </h2>
               <div className="flex justify-end gap-4">
                 <button
@@ -263,10 +326,34 @@ function CalendarAdmin() {
                   Non
                 </button>
                 <button
-                  onClick={() =>
-                    createCreneau(selectedSlot.date, selectedSlot.heure)
-                  }
+                  onClick={handleConfirm}
                   className="px-4 py-2 bg-primary hover:bg-primary-hover cursor-pointer text-black rounded-xl"
+                >
+                  Oui
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal de confirmation suppression */}
+        {showDelete && selectedCreneau && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-cream p-8 rounded-2xl">
+              <h2 className="text-lg font-bold mb-4">Supprimer ce créneau ?</h2>
+              <div className="flex justify-end gap-4">
+                <button
+                  onClick={() => {
+                    setShowDelete(false);
+                    setSelectedCreneau(null);
+                  }}
+                  className="px-4 py-2 bg-secondary hover:bg-secondary-100 cursor-pointer text-cream rounded-xl"
+                >
+                  Non
+                </button>
+                <button
+                  onClick={handleDeleteConfirm}
+                  className="px-4 py-2 bg-primary hover:bg-primary-100 cursor-pointer text-black rounded-xl"
                 >
                   Oui
                 </button>
