@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import supabase from "../../helper/supabaseClient";
+import { FaTrash } from "react-icons/fa";
 
 function DemandesClient() {
   const [demandes, setDemandes] = useState([]);
@@ -40,7 +41,6 @@ function DemandesClient() {
   };
 
   const desinscrireDemande = async (demandeId, creneauId, statutActuel) => {
-    // 1️⃣ Supprimer la demande
     const { error } = await supabase
       .from("demandes")
       .delete()
@@ -51,7 +51,6 @@ function DemandesClient() {
       return;
     }
 
-    // 2️⃣ Si la demande était acceptée, libérer le créneau
     if (statutActuel === "accepte") {
       const { error: errCreneau } = await supabase
         .from("creneaux")
@@ -61,7 +60,6 @@ function DemandesClient() {
       if (errCreneau) console.error("Erreur libération créneau :", errCreneau);
     }
 
-    // 3️⃣ Actualiser l'affichage des demandes
     fetchDemandes();
   };
 
@@ -77,10 +75,10 @@ function DemandesClient() {
         <table className="w-full table-fixed ">
           <thead>
             <tr>
-              <th className="p-4 text-left">Date</th>
-              <th className="p-4 text-left">Heure</th>
-              <th className="p-4 text-left">Statut</th>
-              <th className="p-4 text-left">Action</th>
+              <th className="p-4 text-left font-medium">Date</th>
+              <th className="p-4 text-left font-medium">Heure</th>
+              <th className="p-4 text-left font-medium">Statut</th>
+              <th className="p-4 text-center font-medium">Action</th>
             </tr>
           </thead>
 
@@ -88,37 +86,47 @@ function DemandesClient() {
             {demandes.map((d) => (
               <tr key={d.id}>
                 <td className="border-t border-gray-300 p-4">
-                  {d.creneau.date}
+                  {new Date(d.creneau.date).toLocaleDateString("fr-FR")}
                 </td>
                 <td className="border-t border-gray-300 p-4">
-                  {d.creneau.heure}
+                  {d.creneau.heure.substring(0, 5)}
                 </td>
                 <td className="border-t border-gray-300 p-4">
                   <span
                     className={
                       d.statut === "accepte"
-                        ? "text-green-600 font-medium"
+                        ? "text-purple-200 font-medium bg-purple p-2 rounded-xl"
                         : d.statut === "refuse"
-                        ? "text-red-600 font-medium"
-                        : "text-orange-600 font-medium"
+                        ? "text-gray-500 bg-gray-300 font-medium p-2 rounded-xl"
+                        : "text-yellow-200 bg-yellow font-medium p-2 rounded-xl"
                     }
                   >
-                    {d.statut.charAt(0).toUpperCase() + d.statut.slice(1)}
+                    {
+                      {
+                        accepte: "Accepté",
+                        en_attente: "En attente",
+                        refuse: "Refusé",
+                      }[d.statut]
+                    }
                   </span>
                 </td>
-                <td className="border-t border-gray-300 p-2">
+                <td className="border-t border-gray-300 p-2 text-center">
                   {(d.statut === "en_attente" || d.statut === "accepte") && (
-                    <button
-                      onClick={() =>
-                        desinscrireDemande(d.id, d.creneau.id, d.statut)
-                      }
-                      className="px-2 py-1 rounded bg-red-500 text-white hover:bg-red-600"
-                    >
-                      Se désinscrire
-                    </button>
-                  )}
-                  {d.statut === "refuse" && (
-                    <span className="text-gray-500">Aucune action</span>
+                    <div className="relative inline-block">
+                      <button
+                        onClick={() =>
+                          desinscrireDemande(d.id, d.creneau.id, d.statut)
+                        }
+                        className="relative group p-3 rounded-xl bg-secondary text-white hover:bg-secondary-100 cursor-pointer"
+                      >
+                        <FaTrash />
+
+                        {/* Tooltip */}
+                        <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 p-2 rounded-xl text-sm text-white bg-secondary opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 pointer-events-none">
+                          Se désinscrire
+                        </span>
+                      </button>
+                    </div>
                   )}
                 </td>
               </tr>

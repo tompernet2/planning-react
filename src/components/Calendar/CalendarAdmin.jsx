@@ -266,7 +266,7 @@ function CalendarAdmin() {
                             className={`group relative rounded-xl h-full w-full flex p-2 flex-col text-sm ${
                               isAvailable
                                 ? "bg-green text-green-100 cursor-default"
-                                : "bg-red text-red-100 cursor-default"
+                                : "bg-gray-300 text-gray-700 cursor-default"
                             }`}
                           >
                             {isAvailable && (
@@ -286,7 +286,7 @@ function CalendarAdmin() {
                             </span>
                             <span
                               className={
-                                isAvailable ? "text-green-200" : "text-red-200"
+                                isAvailable ? "text-green-200" : "text-gray-500"
                               }
                             >
                               {" "}

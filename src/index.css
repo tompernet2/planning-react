@@ -28,6 +28,7 @@ body {
   --color-red: #f8b8b8; 
   --color-red-100: #991B1B;
   --color-red-200: #DC2929;
+  --color-red-hover: #F38585;
   --color-green: #b8f2b8; 
   --color-green-hover: #9ee89e; 
   --color-green-100: #166534;
@@ -37,5 +38,6 @@ body {
   --color-yellow-200: #E1912E; 
   --color-purple: #dcc6f8;
   --color-purple-100: #6B21A8;
-  --color-purple-200: #973AEB;
+  --color-purple-200: #973AEB;  
+  --color-purple-hover: #BD94F2;  
 }

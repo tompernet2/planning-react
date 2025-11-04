@@ -196,7 +196,7 @@ function CalendarInvite() {
                             className={`rounded-xl h-full w-full flex p-2 flex-col text-sm ${
                               isAvailable
                                 ? "bg-green text-green-100 cursor-pointer hover:bg-green-hover"
-                                : "bg-red text-red-100 cursor-default"
+                                : "bg-gray-300 text-gray-700 cursor-default"
                             }`}
                           >
                             <span className="font-semibold">
@@ -206,7 +206,7 @@ function CalendarInvite() {
                             </span>
                             <span
                               className={
-                                isAvailable ? "text-green-200" : "text-red-200"
+                                isAvailable ? "text-green-200" : "text-gray-500"
                               }
                             >
                               {" "}

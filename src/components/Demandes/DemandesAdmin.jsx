@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react";
 import supabase from "../../helper/supabaseClient";
+import { FaCheck } from "react-icons/fa";
+import { ImCross } from "react-icons/im";
+
 
 function DemandesAdmin() {
   const [demandes, setDemandes] = useState([]);
@@ -9,7 +12,7 @@ function DemandesAdmin() {
         id,
         statut,
         creneau:creneaux(id, date, heure),
-        client:profiles(email)
+        client:profiles(email, nom, prenom)
       `);
 
     if (error) {
@@ -20,7 +23,7 @@ function DemandesAdmin() {
     const sorted = data.sort((a, b) => {
       const dateA = new Date(`${a.creneau.date}T${a.creneau.heure}`);
       const dateB = new Date(`${b.creneau.date}T${b.creneau.heure}`);
-      return dateA - dateB;
+      return dateB - dateA;
     });
 
     setDemandes(sorted);
@@ -97,57 +100,87 @@ function DemandesAdmin() {
       <div className="rounded-2xl  overflow-hidden bg-white">
         <table className="w-full table-fixed ">
           <thead>
-            <tr>
-              <th className="p-4 text-left">Client</th>
-              <th className="p-4 text-left">Date</th>
-              <th className="p-4 text-left">Heure</th>
-              <th className="p-4 text-left">Statut</th>
-              <th className="p-4 text-left">Action</th>
+            <tr className="">
+              <th className="p-4 text-left font-medium">Client</th>
+              <th className="p-4 text-left font-medium">Date</th>
+              <th className="p-4 text-left font-medium">Heure</th>
+              <th className="p-4 text-left font-medium">Statut</th>
+              <th className="p-4 text-left font-medium">Action</th>
             </tr>
           </thead>
 
           <tbody>
             {demandes.map((d) => (
               <tr key={d.id}>
-                <td className="border-t border-gray-300 p-4">{d.client.email}</td>
-                <td className="border-t border-gray-300 p-4">{d.creneau.date}</td>
-                <td className="border-t border-gray-300 p-4">{d.creneau.heure}</td>
+                <td className="border-t border-gray-300 p-4 font-semibold">
+                  {d.client.prenom} {d.client.nom}
+                </td>
+                <td className="border-t border-gray-300 p-4">
+                  {new Date(d.creneau.date).toLocaleDateString("fr-FR")}
+                </td>
+                <td className="border-t border-gray-300 p-4">
+                  {d.creneau.heure.substring(0, 5)}
+                </td>
                 <td className="border-t border-gray-300 p-4">
                   <span
                     className={
                       d.statut === "accepte"
-                        ? "text-green-600 font-medium"
+                        ? "text-purple-200 font-medium bg-purple p-2 rounded-xl"
                         : d.statut === "refuse"
-                        ? "text-red-600 font-medium"
-                        : "text-orange-600 font-medium"
+                        ? "text-red-200 bg-red font-medium p-2 rounded-xl"
+                        : "text-yellow-200 bg-yellow font-medium p-2 rounded-xl"
                     }
                   >
-                    {d.statut.charAt(0).toUpperCase() + d.statut.slice(1)}
+                    {
+                      {
+                        accepte: "Accepté",
+                        en_attente: "En attente",
+                        refuse: "Refusé",
+                      }[d.statut]
+                    }
                   </span>
                 </td>
-                <td className="border-t border-gray-300 p-4">
-                  <button
-                    onClick={() => acceptDemande(d.id, d.creneau.id)}
-                    disabled={d.statut === "accepte"}
-                    className={`px-2 py-1 rounded ${
-                      d.statut === "accepte"
-                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                        : "bg-green-500 text-white hover:bg-green-600"
-                    }`}
-                  >
-                    Accepter
-                  </button>
-                  <button
-                    onClick={() => refuseDemande(d.id, d.creneau.id, d.statut)}
-                    disabled={d.statut === "refuse"}
-                    className={`px-2 py-1 rounded ${
-                      d.statut === "refuse"
-                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                        : "bg-red-500 text-white hover:bg-red-600"
-                    }`}
-                  >
-                    Refuser
-                  </button>
+                <td className="border-t border-gray-300 p-2">
+                  {/* Bouton Accepter */}
+                  <div className="relative inline-block">
+                    <button
+                      onClick={() => acceptDemande(d.id, d.creneau.id)}
+                      disabled={d.statut === "accepte"}
+                      className={`relative group p-3 rounded-xl mr-2 ${
+                        d.statut === "accepte"
+                          ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                          : "bg-purple text-purple-200 hover:bg-purple-hover"
+                      }`}
+                    >
+                      <FaCheck />
+
+                      {/* Tooltip */}
+                      <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 p-2 text-sm text-white bg-secondary rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 pointer-events-none">
+                        Accepter
+                      </span>
+                    </button>
+                  </div>
+
+                  {/* Bouton Refuser */}
+                  <div className="relative inline-block">
+                    <button
+                      onClick={() =>
+                        refuseDemande(d.id, d.creneau.id, d.statut)
+                      }
+                      disabled={d.statut === "refuse"}
+                      className={`relative group p-3 rounded-xl ${
+                        d.statut === "refuse"
+                          ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                          : "bg-red text-red-200 hover:bg-red-hover"
+                      }`}
+                    >
+                      <ImCross/>
+                      {/* Tooltip */}
+                      <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 p-2 text-sm text-white bg-secondary rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 pointer-events-none">
+                        Refuser
+                      </span>
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}

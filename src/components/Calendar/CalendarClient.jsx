@@ -364,10 +364,10 @@ function CalendarClient() {
                         demande = pendingDemande;
                         mid = "text-yellow-200";
                       } else if (mesRefusedCreneauIds.includes(creneau.id)) {
-                        bgColor = "bg-gray-300";
-                        textColor = "text-gray-700";
+                        bgColor = "bg-red";
+                        textColor = "text-red-100";
                         text = "Refusé";
-                        mid = "text-gray-500";
+                        mid = "text-red-200";
                       } else if (creneau.statut === "disponible") {
                         bgColor = "bg-green";
                         textColor = "text-green-100";
@@ -375,10 +375,10 @@ function CalendarClient() {
                         isClickable = true;
                         mid = "text-green-200";
                       } else {
-                        bgColor = "bg-red";
-                        textColor = "text-red-100";
+                        bgColor = "bg-gray-300";
+                        textColor = "text-gray-700";
                         text = "Occupé";
-                        mid = "text-red-200";
+                        mid = "text-gray-500";
                       }
                     }
 
