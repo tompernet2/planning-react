@@ -16,6 +16,7 @@ function Dashboard() {
     } else {
       setUser(session.user);
 
+
       const { data, error } = await supabase
         .from("profiles")
         .select("role")
@@ -50,7 +51,7 @@ function Dashboard() {
 
   return (
     <div className="p-4 m-5 rounded-2xl">
-      <h1 className="text-2xl font-bold mb-4">Bonjour,</h1>
+      <h1 className="text-2xl font-bold mb-4">Bonjour, {user.prenom}</h1>
       <div className="bg-white text-gray-800 p-4 rounded-2xl min-w-80 inline-block">
         <p className="mb-2">
           <strong>Email :</strong> {user.email}

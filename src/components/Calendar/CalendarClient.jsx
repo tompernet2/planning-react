@@ -354,13 +354,13 @@ function CalendarClient() {
                       if (acceptedDemande) {
                         bgColor = "bg-purple";
                         textColor = "text-purple-100";
-                        text = "Réservé";
+                        text = "Accepté";
                         demande = acceptedDemande;
                         mid = "text-purple-200";
                       } else if (pendingDemande) {
                         bgColor = "bg-yellow";
                         textColor = "text-yellow-100";
-                        text = "Inscrit";
+                        text = "En attente";
                         demande = pendingDemande;
                         mid = "text-yellow-200";
                       } else if (mesRefusedCreneauIds.includes(creneau.id)) {
@@ -405,7 +405,7 @@ function CalendarClient() {
                                 onClick={() => {
                                   handleUnsubscribeClick(demande);
                                 }}
-                                className={`hidden group-hover:flex absolute top-0 right-0 border ${bgColor} hover:opacity-80 m-1 p-0.5 rounded-lg cursor-pointer`}
+                                className={`hidden group-hover:flex absolute top-0 right-0 border border-2 ${bgColor} hover:opacity-80 m-1 p-0.5 rounded-lg cursor-pointer`}
                               >
                                 <IoClose className="w-5 h-5" />
                               </button>

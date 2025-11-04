@@ -6,6 +6,8 @@ function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [prenom, setPrenom] = useState("");
+  const [nom, setNom] = useState("");
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -21,6 +23,13 @@ function Register() {
       return;
     }
 
+    if (data && data.user) {
+      await supabase
+        .from("profiles")
+        .update({ prenom, nom })
+        .eq("id", data.user.id);
+    }
+
     if (data) {
       setMessage(
         "Compte créé avec succès. Vérifiez vos emails pour confirmer votre inscription."
@@ -29,6 +38,8 @@ function Register() {
 
     setEmail("");
     setPassword("");
+    setNom("");
+    setPrenom("");
   };
 
   return (
@@ -45,6 +56,22 @@ function Register() {
         )}
 
         <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
+          <input
+            onChange={(e) => setPrenom(e.target.value)}
+            value={prenom}
+            type="text"
+            placeholder="Prénom"
+            required
+            className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-secondary"
+          />
+          <input
+            onChange={(e) => setNom(e.target.value)}
+            value={nom}
+            type="text"
+            placeholder="Nom"
+            required
+            className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-secondary"
+          />
           <input
             onChange={(e) => setEmail(e.target.value)}
             value={email}
