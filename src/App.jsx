@@ -7,7 +7,6 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Demandes from "./pages/Demandes";
-
 import Wrapper from "./pages/Wrapper";
 
 function App() {
@@ -15,7 +14,8 @@ function App() {
     <BrowserRouter>
       <div className="flex min-h-screen">
         <Navbar />
-        <main className="flex-1 ml-69">
+        {/* Padding top pour mobile (header), margin left pour desktop (sidebar) */}
+        <main className="flex-1 pt-16 md:pt-0 md:ml-64 w-full">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/register" element={<Register />} />
