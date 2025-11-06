@@ -73,7 +73,7 @@ function Dashboard() {
     <div className="p-4 m-5 rounded-2xl">
       <h1 className="text-2xl font-bold mb-4">Bonjour, {profiles.prenom}</h1>
 
-      <div className="bg-white text-gray-800 p-4 rounded-2xl min-w-80 relative inline-block">
+      <div className=" bg-white text-gray-800 p-4 rounded-2xl inline-block max-w-full relative break-words box-border">
         {!editMode && (
           <button
             onClick={() => setEditMode(true)}
