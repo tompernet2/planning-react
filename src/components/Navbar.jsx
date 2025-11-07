@@ -62,7 +62,7 @@ function Navbar() {
       {/* Sidebar */}
       <nav
         className={`
-          fixed top-0 left-0 h-full w-full p-4 z-50 transition-transform duration-300 ease-in-out
+          fixed top-0 left-0 h-full w-full p-4 z-50 bg-cream transition-transform duration-300 ease-in-out
           md:translate-x-0 md:w-64
           ${isOpen ? "translate-x-0 w-64" : "-translate-x-full"}
         `}
