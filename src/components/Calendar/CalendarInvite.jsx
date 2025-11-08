@@ -146,7 +146,7 @@ function CalendarInvite() {
         </div>
 
         {/* VERSION MOBILE - Sélection de jour puis créneaux */}
-        <div className="block md:hidden">
+        <div className="block lg:hidden">
           {/* Les 7 jours de la semaine */}
           <div className="grid grid-cols-7 gap-1 mb-4">
             {joursSemaine.map((date, index) => {
@@ -234,7 +234,7 @@ function CalendarInvite() {
         </div>
 
         {/* VERSION DESKTOP - Grille calendrier */}
-        <div className="hidden md:block rounded-2xl border border-gray-300 overflow-x-auto">
+        <div className="hidden lg:block rounded-2xl border border-gray-300 overflow-x-auto">
           <table className="w-full table-fixed min-w-[640px]">
             <thead>
               <tr>

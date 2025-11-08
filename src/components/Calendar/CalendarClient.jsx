@@ -296,11 +296,11 @@ function CalendarClient() {
               <AiOutlineRight className="w-5 h-5" />
             </button>
           </div>
-          <div className="hidden md:block w-16"></div>
+          <div className="hidden lg:block w-16"></div>
         </div>
 
         {/* VERSION MOBILE - Sélection de jour puis créneaux */}
-        <div className="block md:hidden">
+        <div className="block lg:hidden">
           {/* Les 7 jours de la semaine */}
           <div className="grid grid-cols-7 gap-1 mb-4">
             {joursSemaine.map((date, index) => {
@@ -437,17 +437,17 @@ function CalendarClient() {
         </div>
 
         {/* VERSION DESKTOP - Grille calendrier */}
-        <div className="hidden md:block rounded-2xl border border-gray-300 overflow-x-auto">
+        <div className="hidden lg:block rounded-2xl border border-gray-300 overflow-x-auto">
           <table className="w-full table-fixed min-w-[640px]">
             <thead>
               <tr>
-                <th className="border-r border-b border-gray-300 p-2 w-16 md:w-20 text-xs md:text-sm">
+                <th className="border-r border-b border-gray-300 p-2 w-16 lg:w-20 text-xs lg:text-sm">
                   Heure
                 </th>
                 {joursSemaine.map((date, i) => (
                   <th
                     key={i}
-                    className={`border-b border-gray-300 p-1 md:p-2 text-xs md:text-sm ${
+                    className={`border-b border-gray-300 p-1 lg:p-2 text-xs lg:text-sm ${
                       i < 6 ? "border-r" : ""
                     } ${
                       formatDate(date) === formatDate(today)
@@ -455,22 +455,10 @@ function CalendarClient() {
                         : ""
                     }`}
                   >
-                    <div className="flex flex-col items-center">
-                      <span className="hidden lg:inline">
-                        {date.toLocaleDateString("fr-FR", {
-                          weekday: "short",
-                          day: "numeric",
-                        })}
-                      </span>
-                      <span className="lg:hidden">
-                        {date.toLocaleDateString("fr-FR", {
-                          weekday: "short",
-                        }).substring(0, 3)}
-                      </span>
-                      <span className="lg:hidden font-bold">
-                        {date.getDate()}
-                      </span>
-                    </div>
+                    {date.toLocaleDateString("fr-FR", {
+                      weekday: "short",
+                      day: "numeric",
+                    })}
                   </th>
                 ))}
               </tr>
@@ -480,7 +468,7 @@ function CalendarClient() {
               {heures.map((heure, index) => (
                 <tr key={heure}>
                   <td
-                    className={`border-r border-gray-300 text-gray-500 p-2 md:p-4 font-medium align-top h-16 md:h-24 text-xs md:text-sm ${
+                    className={`border-r border-gray-300 text-gray-500 p-2 lg:p-4 font-medium align-top h-16 lg:h-24 text-xs lg:text-sm ${
                       index < heures.length - 1 ? "border-b" : ""
                     }`}
                   >
@@ -525,7 +513,7 @@ function CalendarClient() {
                       } else if (creneau.statut === "disponible") {
                         bgColor = "bg-green";
                         textColor = "text-green-100";
-                        text = "Dispo";
+                        text = "Disponible";
                         isClickable = true;
                         mid = "text-green-200";
                       } else {
@@ -539,7 +527,7 @@ function CalendarClient() {
                     return (
                       <td
                         key={i}
-                        className={`p-0.5 h-16 md:h-24 ${i < 6 ? "border-r" : ""} ${
+                        className={`p-0.5 h-16 lg:h-24 ${i < 6 ? "border-r" : ""} ${
                           index < heures.length - 1 ? "border-b" : ""
                         } border-gray-300`}
                       >
@@ -548,7 +536,7 @@ function CalendarClient() {
                             onClick={() =>
                               isClickable && handleSlotClick(date, heure)
                             }
-                            className={`group relative rounded-lg md:rounded-xl h-full w-full flex p-1.5 md:p-2 flex-col text-xs md:text-sm ${bgColor} ${textColor} ${
+                            className={`group relative rounded-lg lg:rounded-xl h-full w-full flex p-1.5 lg:p-2 flex-col text-xs lg:text-sm ${bgColor} ${textColor} ${
                               isClickable
                                 ? "cursor-pointer hover:opacity-80"
                                 : "cursor-default"
@@ -562,12 +550,12 @@ function CalendarClient() {
                                 }}
                                 className={`hidden group-hover:flex absolute top-0 right-0 border border-2 ${bgColor} hover:opacity-80 m-1 p-0.5 rounded-lg cursor-pointer`}
                               >
-                                <IoClose className="w-4 h-4 md:w-5 md:h-5" />
+                                <IoClose className="w-4 h-4 lg:w-5 lg:h-5" />
                               </button>
                             )}
-                            <span className="font-semibold text-[10px] md:text-sm">{text}</span>
+                            <span className="font-semibold text-[10px] lg:text-sm">{text}</span>
 
-                            <span className={`text-[9px] md:text-xs ${mid}`}>
+                            <span className={`text-[9px] lg:text-xs ${mid}`}>
                               {heure.substring(0, 5)} -{" "}
                               {String(
                                 parseInt(heure.split(":")[0]) + 1
